@@ -1,0 +1,25 @@
+{
+  "name": "location404-web",
+  "version": "1.0.0",
+  "description": "Location404 Web Application with User Registration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["location404", "web", "user-registration"],
+  "author": "Location404",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "next": "^15.5.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "typescript": "^5.9.2"
+  }
+}
