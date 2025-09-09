@@ -1,16 +1,16 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-light via-blue-medium to-blue-dark px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-light via-gray-600 to-green-medium px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-4">
       <div class="text-center">
-        <div class="mx-auto flex items-center justify-center mb-6">
-          <img src="/logo.png" alt="Location404" class="h-36 w-36" />
+        <div class="mx-auto flex items-center justify-center">
+          <img src="/logo.png" alt="Location404" class="object-contain h-40 w-40" />
         </div>
-        <h2 class="text-3xl font-bold text-white mb-2">Bem-vindo de volta</h2>
+        <h2 class="text-3xl font-bold text-white">Bem-vindo de volta</h2>
         <p class="text-blue-light">Entre na sua conta Location404</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="mt-4 space-y-6">
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
+      <form @submit.prevent="handleLogin" class="mt-8 space-y-6">
+        <div class="bg-white/15 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/25 ring-1 ring-green-light/20">
           <div class="space-y-6">
             <div>
               <label for="email" class="block text-sm font-medium text-white mb-2">
@@ -77,9 +77,9 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-blue-dark bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-medium to-green-medium hover:from-blue-dark hover:to-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-light/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -90,7 +90,7 @@
           <div class="mt-6 text-center">
             <p class="text-white/80">
               Não tem uma conta?
-              <router-link to="/register" class="font-medium text-white hover:text-blue-light transition-colors">
+              <router-link to="/register" class="font-medium text-green-light hover:text-green-medium transition-colors">
                 Cadastre-se aqui
               </router-link>
             </p>

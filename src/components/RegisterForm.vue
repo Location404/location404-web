@@ -1,20 +1,20 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-light via-blue-medium to-blue-dark px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-light via-gray-600 to-green-medium px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-4">
       <div class="text-center">
-        <div class="mx-auto h-20 w-20 flex items-center justify-center rounded-full bg-white shadow-lg mb-6">
-          <img src="/logo.png" alt="Location404" class="h-12 w-12" />
+        <div class="mx-auto flex items-center justify-center">
+          <img src="/logo.png" alt="Location404" class="object-contain h-40 w-40" />
         </div>
         <h2 class="text-3xl font-bold text-white mb-2">Criar conta</h2>
         <p class="text-blue-light">Junte-se ao Location404</p>
       </div>
 
       <form @submit.prevent="handleRegister" class="mt-8 space-y-6">
-        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
+        <div class="bg-white/15 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/25 ring-1 ring-green-light/20">
           <div class="space-y-6">
             <div>
               <label for="name" class="block text-sm font-medium text-white mb-2">
-                Nome completo
+                Nome
               </label>
               <input
                 id="name"
@@ -22,7 +22,7 @@
                 type="text"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="Seu nome completo"
+                placeholder="nome"
               />
             </div>
 
@@ -106,11 +106,11 @@
               />
               <label for="terms" class="ml-2 block text-sm text-white">
                 Aceito os 
-                <a href="#" class="text-white hover:text-blue-light transition-colors underline">
+                <a href="#" class="text-green-light hover:text-green-medium transition-colors underline">
                   termos de uso
                 </a>
                 e 
-                <a href="#" class="text-white hover:text-blue-light transition-colors underline">
+                <a href="#" class="text-green-light hover:text-green-medium transition-colors underline">
                   política de privacidade
                 </a>
               </label>
@@ -121,9 +121,9 @@
             <button
               type="submit"
               :disabled="loading || !isFormValid"
-              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-blue-dark bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-medium to-green-medium hover:from-blue-dark hover:to-green-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-light/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -134,7 +134,7 @@
           <div class="mt-6 text-center">
             <p class="text-white/80">
               Já tem uma conta?
-              <router-link to="/login" class="font-medium text-white hover:text-blue-light transition-colors">
+              <router-link to="/login" class="font-medium text-green-light hover:text-green-medium transition-colors">
                 Entre aqui
               </router-link>
             </p>
