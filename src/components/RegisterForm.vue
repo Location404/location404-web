@@ -14,7 +14,7 @@
           <div class="space-y-6">
             <div>
               <label for="name" class="block text-sm font-medium text-white mb-2">
-                Nome
+                Apelido
               </label>
               <input
                 id="name"
@@ -22,7 +22,7 @@
                 type="text"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="nome"
+                placeholder="pedrin"
               />
             </div>
 
@@ -36,7 +36,7 @@
                 type="email"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="seu@email.com"
+                placeholder="predrin@example.com"
               />
             </div>
 
@@ -51,7 +51,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   required
                   class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                  placeholder="••••••••"
+                  placeholder="••••••••••"
                 />
                 <button
                   type="button"
@@ -89,7 +89,7 @@
                 type="password"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="••••••••"
+                placeholder="••••••••••"
               />
               <p v-if="form.confirmPassword && form.password !== form.confirmPassword" class="text-red-300 text-xs mt-1">
                 As senhas não coincidem
@@ -148,10 +148,11 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { authService, type RegisterData } from '@/services/api'
+import { toast } from 'vue-sonner'
+import 'vue-sonner/style.css'
 
 const router = useRouter()
-const authStore = useAuthStore()
 
 const loading = ref(false)
 const showPassword = ref(false)
@@ -167,11 +168,11 @@ const form = reactive({
 const passwordStrength = computed(() => {
   const password = form.password
   let strength = 0
-  
-  if (password.length >= 8) strength++
+
+  if (password.length >= 6) strength ++
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++
-  if (/\d/.test(password) && /[!@#$%^&*]/.test(password)) strength++
-  
+  if (/\d/.test(password)) strength++
+
   return strength
 })
 
@@ -186,36 +187,48 @@ const passwordStrengthText = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return form.name && 
-         form.email && 
-         form.password && 
-         form.confirmPassword && 
-         form.password === form.confirmPassword && 
-         form.acceptTerms &&
-         passwordStrength.value >= 2
+  return form.name &&
+    form.email &&
+    form.password &&
+    form.confirmPassword &&
+    form.password === form.confirmPassword &&
+    form.acceptTerms &&
+    passwordStrength.value >= 2
 })
 
 const handleRegister = async () => {
-  if (!isFormValid.value) return
-  
+  if (!isFormValid.value) {
+    return
+  }
+
   loading.value = true
-  
+
+  const registerData: RegisterData = {
+    name: form.name,
+    email: form.email,
+    password: form.password
+  }
+
   try {
-    // Simular chamada de API
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Simular registro bem-sucedido
-    authStore.login({
-      email: form.email,
-      name: form.name
-    })
-    
-    router.push('/dashboard')
-  } catch (error) {
-    console.error('Erro no registro:', error)
+    await toast.promise(
+      authService.register(registerData),
+      {
+        loading: 'Criando sua conta...',
+        success: () => {
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+          return 'Conta criada com sucesso! Redirecionando para o login...'
+        },
+        error: (err) => {
+          return err.message || 'Erro ao criar conta. Tente novamente mais tarde.'
+        }
+      }
+    )
+  } catch (error: any) {
+    console.error(error)
   } finally {
     loading.value = false
   }
 }
 </script>
-

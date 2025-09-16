@@ -105,6 +105,8 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { authService, type LoginData } from '@/services/api'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -121,19 +123,35 @@ const form = reactive({
 const handleLogin = async () => {
   loading.value = true
   
+  const loginData: LoginData = {
+    email: form.email,
+    password: form.password
+  }
+
   try {
-    // Simular chamada de API
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Simular login bem-sucedido
-    authStore.login({
-      email: form.email,
-      name: form.email.split('@')[0]
+    await toast.promise(authService.login(loginData), {
+      loading: 'Fazendo login...',
+      success: (data) => {
+        if (data.success && data.data?.token) {
+          localStorage.setItem('auth_token', data.data.token)
+          authStore.login({
+            email: form.email,
+            name: data.data?.name || form.email.split('@')[0]
+          })
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 1000)
+          return 'Login realizado com sucesso!'
+        } else {
+          return data.message || 'Erro ao fazer login. Verifique suas credenciais.'
+        }
+      },
+      error: (err) => {
+        return err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.'
+      }
     })
-    
-    router.push('/dashboard')
-  } catch (error) {
-    console.error('Erro no login:', error)
+  } catch (error: any) {
+    console.error('Erro inesperado:', error)
   } finally {
     loading.value = false
   }
