@@ -36,7 +36,7 @@
                 type="email"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="predrin@example.com"
+                placeholder="pedrin@example.com"
               />
             </div>
 
@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService, type RegisterData } from '@/services/api'
+import { authService, type RegisterRequest } from '@/services/userIdentity'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
@@ -203,32 +203,25 @@ const handleRegister = async () => {
 
   loading.value = true
 
-  const registerData: RegisterData = {
-    name: form.name,
+  const registerReRegisterRequest: RegisterRequest = {
+    username: form.name,
     email: form.email,
     password: form.password
   }
 
-  try {
-    await toast.promise(
-      authService.register(registerData),
-      {
-        loading: 'Criando sua conta...',
-        success: () => {
-          setTimeout(() => {
-            router.push('/login')
-          }, 2000)
-          return 'Conta criada com sucesso! Redirecionando para o login...'
-        },
-        error: (err) => {
-          return err.message || 'Erro ao criar conta. Tente novamente mais tarde.'
-        }
+  await toast.promise(
+    authService.register(registerReRegisterRequest),
+    {
+      loading: 'Criando sua conta...',
+      success: () => {
+        router.push('/login');
+        return 'Conta criada com sucesso!'
+      },
+      error: (err) => {
+        console.error(err)
+        return err.response?.data?.message || err.message || 'Erro ao criar conta. Tente novamente mais tarde.'
       }
-    )
-  } catch (error: any) {
-    console.error(error)
-  } finally {
-    loading.value = false
-  }
+    }
+  )
 }
 </script>

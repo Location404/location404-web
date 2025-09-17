@@ -103,13 +103,8 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import { authService, type LoginData } from '@/services/api'
+import { authService, type LoginRequest, type LoginResponse } from '@/services/userIdentity'
 import { toast } from 'vue-sonner'
-
-const router = useRouter()
-const authStore = useAuthStore()
 
 const loading = ref(false)
 const showPassword = ref(false)
@@ -123,31 +118,19 @@ const form = reactive({
 const handleLogin = async () => {
   loading.value = true
   
-  const loginData: LoginData = {
+  const loginRequest: LoginRequest = {
     email: form.email,
     password: form.password
   }
 
   try {
-    await toast.promise(authService.login(loginData), {
-      loading: 'Fazendo login...',
-      success: (data) => {
-        if (data.success && data.data?.token) {
-          localStorage.setItem('auth_token', data.data.token)
-          authStore.login({
-            email: form.email,
-            name: data.data?.name || form.email.split('@')[0]
-          })
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 1000)
-          return 'Login realizado com sucesso!'
-        } else {
-          return data.message || 'Erro ao fazer login. Verifique suas credenciais.'
-        }
+    await toast.promise(authService.login(loginRequest), {
+      loading: 'Autenticando...',
+      success: (data: LoginResponse) => {
+        return 'Login realizado com sucesso!'
       },
-      error: (err) => {
-        return err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.'
+      error: (err: any) => {
+        return err.message || err.response?.data?.message || 'Erro ao fazer login. Tente novamente mais tarde.'
       }
     })
   } catch (error: any) {
