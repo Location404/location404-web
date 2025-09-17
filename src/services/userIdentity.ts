@@ -67,7 +67,7 @@ export const authService = {
     try {
       const response = await useridentity.post('users', data)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw error
     }
     finally {
@@ -80,7 +80,7 @@ export const authService = {
       const response = await useridentity.post('auth/login', data)
       setTokenAndRefreshToken(response.data)
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw error
     }
   },
