@@ -1,9 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-export const useAuthStore = defineStore('auth', () => {
+let accessToken: string | null = null
+
+export function setAccessToken(token: string | null) {
+  accessToken = token
+}
+
+export function getAccessToken(): string | null {
+  return accessToken
+}
+
+export const authStore = defineStore('auth', () => {
   const user = ref({
     isAuthenticated: false,
+    id: null as string | null,
     email: null as string | null,
     name: null as string | null
   })
@@ -12,9 +23,10 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed(() => user.value.email)
   const userName = computed(() => user.value.name)
 
-  function login(userData: { email: string; name: string }) {
+  function login(userData: { email: string; name: string; id: string }) {
     user.value = {
       isAuthenticated: true,
+      id: userData.id,
       email: userData.email,
       name: userData.name
     }
@@ -23,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     user.value = {
       isAuthenticated: false,
+      id: null,
       email: null,
       name: null
     }

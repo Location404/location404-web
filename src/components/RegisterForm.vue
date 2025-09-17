@@ -209,7 +209,7 @@ const handleRegister = async () => {
     password: form.password
   }
 
-  await toast.promise(
+  toast.promise(
     authService.register(registerReRegisterRequest),
     {
       loading: 'Criando sua conta...',

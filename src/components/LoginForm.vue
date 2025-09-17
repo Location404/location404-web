@@ -105,6 +105,7 @@
 import { ref, reactive } from 'vue'
 import { authService, type LoginRequest, type LoginResponse } from '@/services/userIdentity'
 import { toast } from 'vue-sonner'
+import { authStore } from '@/stores/auth'
 
 const loading = ref(false)
 const showPassword = ref(false)
@@ -124,16 +125,17 @@ const handleLogin = async () => {
   }
 
   try {
-    await toast.promise(authService.login(loginRequest), {
+    toast.promise(authService.login(loginRequest), {
       loading: 'Autenticando...',
       success: (data: LoginResponse) => {
+        authStore().login({ id: data.id, email: data.email, name: data.username })
         return 'Login realizado com sucesso!'
       },
       error: (err: any) => {
         return err.message || err.response?.data?.message || 'Erro ao fazer login. Tente novamente mais tarde.'
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Erro inesperado:', error)
   } finally {
     loading.value = false

@@ -1,4 +1,7 @@
 import axios from 'axios'
+import router from '@/router'
+import { getAccessToken, setAccessToken } from '@/stores/auth'
+import { computed } from 'vue'
 
 const useridentity = axios.create({
   baseURL: '/api',
@@ -8,11 +11,12 @@ const useridentity = axios.create({
   },
 })
 
+const accessToken = computed(() => getAccessToken())
+
 useridentity.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (accessToken.value !== null) {
+      config.headers.Authorization = `Bearer ${accessToken.value}`
     }
     return config
   },
@@ -21,76 +25,65 @@ useridentity.interceptors.request.use(
   }
 )
 
-// useridentity.interceptors.response.use(
-//   (response) => {
-//     return response
-//   },
-//   (error) => {
-//     // Tratamento global de erros
-//     if (error.response?.status === 401) {
-//       // Token expirado ou inválido
-//       localStorage.removeItem('auth_token')
-//       window.location.href = '/login'
-//     }
-//     return Promise.reject(error)
-//   }
-// )
+useridentity.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  async (error) => {
+    const originalRequest = error.config
+    if (error.response?.status === 401 && !originalRequest._isRetry) {
+      originalRequest._isRetry = true
+      try {
+        const refreshResponse = await useridentity.post('/auth/refresh-token')
+        const newAccessToken = refreshResponse.data.accessToken
 
+        setAccessToken(newAccessToken)
 
-export interface RegisterRequest{
-  username: string  
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+        return useridentity(originalRequest)
+      } catch (refreshError) {
+        
+        setAccessToken(null)
+        router.push('/login')
+        return Promise.reject(refreshError)
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
+export interface RegisterRequest {
+  username: string
   email: string
   password: string
 }
 
-export interface RegisterResponse{
+export interface RegisterResponse {
   id: string,
   username: string,
   email: string,
 }
 
-export interface LoginRequest{
+export interface LoginRequest {
   email: string
   password: string
 }
 
-export interface LoginResponse{
+export interface LoginResponse {
+  id: string
   accessToken: string
-  refreshToken: string
-  refreshTokenExpiresAt: Date
-  tokenType: string
-  refreshTokenExpiresInSeconds: number
+  username: string
+  email: string
 }
 
 export const authService = {
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    try {
-      const response = await useridentity.post('users', data)
-      return response.data
-    } catch (error: unknown) {
-      throw error
-    }
-    finally {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    const response = await useridentity.post('users', data)
+    return response.data
   },
 
-  async login(data: LoginRequest): Promise<LoginResponse> { 
-    try {
-      const response = await useridentity.post('auth/login', data)
-      setTokenAndRefreshToken(response.data)
-      return response.data;
-    } catch (error: unknown) {
-      throw error
-    }
+  async login(data: LoginRequest): Promise<LoginResponse> {
+    const response = await useridentity.post('auth/login', data)
+    return response.data
   },
 }
-
-function setTokenAndRefreshToken(response: LoginResponse) {
-  localStorage.setItem('auth_token', response.accessToken)
-  localStorage.setItem('refresh_token', response.refreshToken)
-  localStorage.setItem('refresh_token_expires_at', response.refreshTokenExpiresAt.toString())
-}
-
-export default useridentity
-
