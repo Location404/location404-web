@@ -1,7 +1,7 @@
 import axios from 'axios'
 import router from '@/router'
-import { getAccessToken, setAccessToken } from '@/stores/auth'
 import { computed } from 'vue'
+import { authStore } from '@/stores/auth'
 
 const useridentity = axios.create({
   baseURL: '/api',
@@ -11,7 +11,7 @@ const useridentity = axios.create({
   },
 })
 
-const accessToken = computed(() => getAccessToken())
+const accessToken = computed(() => authStore().getAccessToken())
 
 useridentity.interceptors.request.use(
   (config) => {
@@ -37,13 +37,13 @@ useridentity.interceptors.response.use(
         const refreshResponse = await useridentity.post('/auth/refresh-token')
         const newAccessToken = refreshResponse.data.accessToken
 
-        setAccessToken(newAccessToken)
+        authStore().setAccessToken(newAccessToken)
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
         return useridentity(originalRequest)
       } catch (refreshError) {
         
-        setAccessToken(null)
+        authStore().logout()
         router.push('/login')
         return Promise.reject(refreshError)
       }
@@ -72,6 +72,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   id: string
   accessToken: string
+  refreshToken: string
   username: string
   email: string
 }

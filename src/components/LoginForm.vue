@@ -128,7 +128,15 @@ const handleLogin = async () => {
     toast.promise(authService.login(loginRequest), {
       loading: 'Autenticando...',
       success: (data: LoginResponse) => {
-        authStore().login({ id: data.id, email: data.email, name: data.username })
+        authStore().login(
+          { 
+            id: data.id, 
+            email: data.email, 
+            name: data.username 
+          }, 
+          data.accessToken, 
+          data.refreshToken)
+
         return 'Login realizado com sucesso!'
       },
       error: (err: any) => {
