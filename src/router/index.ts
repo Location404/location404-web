@@ -3,7 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import PlayView from '../views/PlayView.vue'
 import ConfigView from '@/views/ConfigView.vue'
-import { authStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -40,16 +40,16 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  console.log('Navigating to:', to.fullPath, 'Requires Auth:', requiresAuth);
-  console.log('Is Authenticated:', authStore().isAuthenticated);
-  if (requiresAuth && !authStore().isAuthenticated) {
-    next({ name: 'login' });
-  } else if (to.name === 'login' && authStore().isAuthenticated) {
-    next({ name: 'play' });
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const store = useAuthStore()
+
+  if (requiresAuth && !store.isAuthenticated) {
+    next({ name: 'login' })
+  } else if (to.name === 'login' && store.isAuthenticated) {
+    next({ name: 'play' })
   } else {
-    next();
+    next()
   }
-});
+})
 
 export default router

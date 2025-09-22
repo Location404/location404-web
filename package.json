@@ -18,6 +18,7 @@
   "dependencies": {
     "axios": "^1.12.2",
     "pinia": "^3.0.3",
+    "universal-cookie": "^8.0.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
     "vue-sonner": "^2.0.8"

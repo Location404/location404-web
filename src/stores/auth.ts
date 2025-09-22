@@ -1,38 +1,41 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import Cookies from 'universal-cookie'
 
-let accessToken: string | null = null
-let refreshToken: string | null = null
+const cookies = new Cookies(null, { path: '/' });
 
-export const authStore = defineStore('auth', () => {
-  const user = ref({
+const accessToken = ref<string | null>(cookies.get('accessToken'))
+const refreshToken = ref<string | null>(cookies.get('refreshToken'))
+
+const getInitialUser = () => {
+  const savedUser = localStorage.getItem('user')
+  if (savedUser) {
+    try {
+      const parsedUser = JSON.parse(savedUser)
+      if (parsedUser.isAuthenticated) {
+        return parsedUser
+      }
+    } catch (e) {
+      localStorage.removeItem('user')
+    }
+  }
+  else {
+    //TODO: call /me to check if the user is authenticated
+  }
+  return {
     isAuthenticated: false,
     id: null as string | null,
     email: null as string | null,
     name: null as string | null,
-  })
-
-  function setAccessToken(token: string | null) {
-    accessToken = token
   }
+}
 
-  function setRefreshToken(token: string | null) {
-    refreshToken = token
-  }
+const user = ref(getInitialUser())
+const isAuthenticated = computed(() => user.value.isAuthenticated)
+const userName = computed(() => user.value.name)
 
-  function getRefreshToken(): string | null {
-    return refreshToken
-  }
-
-  function getAccessToken(): string | null {
-    return accessToken
-  }
-
-  const isAuthenticated = computed(() => user.value.isAuthenticated)
-  const userEmail = computed(() => user.value.email)
-  const userName = computed(() => user.value.name)
-
-  function login(userData: { email: string; name: string; id: string }, token: string, refresh: string) {
+export const useAuthStore = defineStore('auth', () => {
+  function login(userData: { email: string; name: string; id: string }) {
     user.value = {
       isAuthenticated: true,
       id: userData.id,
@@ -40,8 +43,10 @@ export const authStore = defineStore('auth', () => {
       name: userData.name
     }
     
-    setAccessToken(token)
-    setRefreshToken(refresh)
+    localStorage.setItem('user', JSON.stringify(user.value));
+    
+    accessToken.value = cookies.get('accessToken')
+    refreshToken.value = cookies.get('refreshToken')
   }
 
   function logout() {
@@ -52,21 +57,21 @@ export const authStore = defineStore('auth', () => {
       name: null
     }
 
-    setAccessToken(null)
-    
+    accessToken.value = null
+    refreshToken.value = null
+
+    cookies.remove('accessToken')
+    cookies.remove('refreshToken')
+    localStorage.removeItem('user')
   }
 
   return {
     user,
+    accessToken,
+    refreshToken,
     isAuthenticated,
-    userEmail,
     userName,
     login,
-    logout,
-    getAccessToken,
-    getRefreshToken,
-    setAccessToken,
-    setRefreshToken
+    logout
   }
 })
-
