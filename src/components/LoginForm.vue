@@ -106,6 +106,7 @@ import { ref, reactive } from 'vue'
 import { authService, type LoginRequest, type LoginResponse } from '@/services/userIdentity'
 import { toast } from 'vue-sonner'
 import { authStore } from '@/stores/auth'
+import router from '@/router'
 
 const loading = ref(false)
 const showPassword = ref(false)
@@ -137,6 +138,7 @@ const handleLogin = async () => {
           data.accessToken, 
           data.refreshToken)
 
+        router.push('/play')
         return 'Login realizado com sucesso!'
       },
       error: (err: any) => {
