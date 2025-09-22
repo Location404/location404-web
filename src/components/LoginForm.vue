@@ -103,7 +103,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { authService, type LoginRequest, type LoginResponse } from '@/services/userIdentity'
+import { authService, type LoginRequest, type LoginResponse } from '@/services/userIdentityService'
 import { toast } from 'vue-sonner'
 import { authStore } from '@/stores/auth'
 import router from '@/router'

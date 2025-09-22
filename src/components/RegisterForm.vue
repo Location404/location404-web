@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService, type RegisterRequest } from '@/services/userIdentity'
+import { authService, type RegisterRequest } from '@/services/userIdentityService'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
