@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-light via-gray-600 to-green-medium flex flex-col gap-16">
+  <div class="min-h-screen bg-gradient-to-br from-blue-light via-gray-600 to-green-medium flex flex-col gap-10">
     <Toolbar />
 
     <main class="flex-grow overflow-y-auto h-full w-full flex items-center justify-center">
-        <PlayForm />
+        <PlayForm />  
     </main>
   </div>
 </template>

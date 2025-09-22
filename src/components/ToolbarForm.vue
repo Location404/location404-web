@@ -1,6 +1,6 @@
 <template>
   <nav class="p-2 sm:p-4 flex items-center justify-center">
-    <div class="relative w-full max-w-5xl flex items-center justify-center p-2 bg-white/15 backdrop-blur-md rounded-full shadow-xl border border-white/25 ring-1 ring-green-light/20">
+    <div class="relative w-[81%] flex items-center justify-center p-2 bg-white/15 backdrop-blur-md rounded-full shadow-xl border border-white/25 ring-1 ring-green-light/20">
 
       <div class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 flex items-center space-x-2 sm:space-x-3">
         <img src="/public/logo.png" alt="Location404 Logo" class="h-10 w-10 sm:h-12 sm:w-12"/>
