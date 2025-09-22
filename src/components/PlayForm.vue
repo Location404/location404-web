@@ -1,32 +1,19 @@
 <template>
   <div class="w-full h-full flex items-center justify-center">
     <div
-      class="w-[90%] md:w-[80%] min-h-[80vh] shrink-0 flex flex-col md:flex-row items-center justify-center gap-10
-             bg-white/15 backdrop-blur-md rounded-2xl shadow-xl
-             border border-white/25 ring-1 ring-green-light/20
-             mb-56 p-4 md:p-10"
+      class="relative w-[80%] md:w-[80%] min-h-[80vh] flex flex-col items-start justify-start gap-10 border-2 border-white/25 rounded-2xl shadow-xl mb-20 p-6 md:p-10 overflow-hidden"
     >
-      <button
-        class="w-[80%] md:w-[30%] h-[20vh] flex items-center justify-center
-               bg-white/15 backdrop-blur-md rounded-2xl shadow-xl
-               border border-white/25 ring-1 ring-green-light/20
-               text-white text-2xl font-bold text-center
-               hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-green-light
-               transition-all duration-300"
-      >
-        Single Player
-      </button>
-
-      <button
-        class="w-[80%] md:w-[30%] h-[20vh] flex items-center justify-center
-               bg-white/15 backdrop-blur-md rounded-2xl shadow-xl
-               border border-white/25 ring-1 ring-blue-light/20
-               text-white text-2xl font-bold text-center
-               hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-blue-light
-               transition-all duration-300"
-      >
-        Multi Player
-      </button>
+      <div
+        class="absolute inset-0 bg-cover bg-center filter blur-sm"
+        :style="{ backgroundImage: `url(${background})` }"
+      ></div>
+      <div
+        class="relative z-10 w-full h-full flex items-center justify-center"
+      ></div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import background from "../assets/bg.png";
+</script>

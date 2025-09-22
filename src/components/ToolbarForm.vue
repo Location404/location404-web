@@ -3,7 +3,7 @@
     <div class="relative w-[81%] flex items-center justify-center p-2 bg-white/15 backdrop-blur-md rounded-full shadow-xl border border-white/25 ring-1 ring-green-light/20">
 
       <div class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 flex items-center space-x-2 sm:space-x-3">
-        <img src="/public/logo.png" alt="Location404 Logo" class="h-10 w-10 sm:h-12 sm:w-12"/>
+        <img src="@/assets/logo.png" alt="Location404 Logo" class="h-10 w-10 sm:h-12 sm:w-12"/>
         <span class="text-white font-bold text-lg sm:text-xl hidden sm:inline">Location404</span>
       </div>
 

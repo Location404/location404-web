@@ -3,7 +3,7 @@
     <div class="max-w-md w-full space-y-4">
       <div class="text-center">
         <div class="mx-auto flex items-center justify-center">
-          <img src="/logo.png" alt="Location404" class="object-contain h-40 w-40" />
+          <img src="../assets/logo.png" alt="Location404" class="object-contain h-40 w-40" />
         </div>
         <h2 class="text-3xl font-bold text-white mb-2">Criar conta</h2>
         <p class="text-blue-light">Junte-se ao Location404</p>
