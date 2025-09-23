@@ -8,7 +8,6 @@
         :style="{ backgroundImage: `url(${background})` }"
       ></div>
 
-      <!-- Conteúdo -->
       <aside class="w-full md:w-1/4 flex flex-col gap-4 relative z-10">
         <button
           class="py-2 px-4 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition text-left"
@@ -24,6 +23,8 @@
       </aside>
 
       <form
+        v-if="userProfile"
+        @submit.prevent="saveProfile"
         class="w-full md:w-3/4 flex flex-col gap-6 text-white relative z-10"
       >
         <div class="flex flex-col md:flex-row gap-8">
@@ -32,6 +33,7 @@
               <span class="w-[70px] shrink-0">Apelido:</span>
               <input
                 type="text"
+                v-model="userProfile.username"
                 class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
               />
             </label>
@@ -40,6 +42,8 @@
               <span class="min-w-[70px] shrink-0">Ícone:</span>
               <input
                 type="file"
+                @change="onFileSelected"
+                accept="image/*"
                 class="w-full text-sm text-white/80 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
               />
             </label>
@@ -48,6 +52,7 @@
               <span class="w-[70px] shrink-0">Email:</span>
               <input
                 type="email"
+                v-model="userProfile.email"
                 class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
               />
             </label>
@@ -55,9 +60,16 @@
 
           <div class="w-full md:w-auto flex justify-center items-start">
             <div
-              class="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-black/20 rounded-2xl flex items-center justify-center border border-white/20"
+              class="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-black/20 rounded-2xl flex items-center justify-center border border-white/20 overflow-hidden"
             >
+              <img
+                v-if="imagePreviewUrl"
+                :src="imagePreviewUrl"
+                alt="Prévia do perfil"
+                class="w-full h-full object-cover"
+              />
               <svg
+                v-else
                 xmlns="http://www.w3.org/2000/svg"
                 class="w-16 h-16 text-white/40"
                 viewBox="0 0 24 24"
@@ -75,9 +87,11 @@
 
         <div class="flex flex-col md:flex-row gap-8 w-full">
           <label class="flex-1 flex flex-col gap-1">
-            <span>Senha:</span>
+            <span>Senha (deixe em branco para não alterar):</span>
             <input
               type="password"
+              v-model="password"
+              autocomplete="new-password"
               class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
             />
           </label>
@@ -85,6 +99,8 @@
             <span>Confirmar Senha:</span>
             <input
               type="password"
+              v-model="confirmPassword"
+              autocomplete="new-password"
               class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
             />
           </label>
@@ -104,11 +120,85 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import background from "../assets/bg.png";
+import { useUserIdentityService } from "@/services/userIdentityService";
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  profileImageUrl: string;
+}
+
+const userProfile = ref<UserProfile | null>(null);
+const password = ref("");
+const confirmPassword = ref("");
+const selectedFile = ref<File | null>(null);
+const imagePreviewUrl = ref<string | null>(null);
 
 function logout() {
   useAuthStore().logout();
-   window.location.reload();
+  window.location.reload();
 }
+
+async function fetchUserProfile() {
+  try {
+    const profileData = await useUserIdentityService.getUserProfile();
+    userProfile.value = profileData;
+    imagePreviewUrl.value = profileData.profileImageUrl;
+  } catch (error) {
+    console.error("Falha ao buscar o perfil do usuário:", error);
+  }
+}
+
+function onFileSelected(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    selectedFile.value = file;
+    imagePreviewUrl.value = URL.createObjectURL(file);
+  }
+}
+
+async function saveProfile() {
+  if (!userProfile.value) {
+    return;
+  }
+
+  if (password.value !== confirmPassword.value) {
+    alert("As senhas não conferem!");
+    return;
+  }
+
+  try {
+    const updatePayload = {
+      username: userProfile.value.username,
+      email: userProfile.value.email,
+      password: password.value || undefined,
+    };
+    
+    // Supondo que você tenha um método para salvar os dados e outro para o upload da imagem
+    // await useUserIdentityService.updateUserProfile(updatePayload);
+    
+    // if (selectedFile.value) {
+    //   await useUserIdentityService.updateProfileImage(selectedFile.value);
+    // }
+
+    console.log("Salvando dados:", updatePayload);
+    if(selectedFile.value) {
+      console.log("Enviando nova imagem:", selectedFile.value.name)
+    }
+
+    alert("Perfil salvo com sucesso!");
+  } catch (error) {
+    console.error("Falha ao salvar o perfil:", error);
+    alert("Ocorreu um erro ao salvar o perfil.");
+  }
+}
+
+onMounted(() => {
+  fetchUserProfile();
+});
 </script>

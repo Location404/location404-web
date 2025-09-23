@@ -33,6 +33,7 @@ const getInitialUser = () => {
 const user = ref(getInitialUser())
 const isAuthenticated = computed(() => user.value.isAuthenticated)
 const userName = computed(() => user.value.name)
+const userId = computed(() => user.value.id)
 
 export const useAuthStore = defineStore('auth', () => {
   function login(userData: { email: string; name: string; id: string }) {

@@ -168,7 +168,7 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import {
-  authService,
+  useUserIdentityService,
   type LoginRequest,
   type LoginResponse,
 } from "@/services/userIdentityService";
@@ -194,7 +194,7 @@ const handleLogin = async () => {
   };
 
   try {
-    toast.promise(authService.login(loginRequest), {
+    toast.promise(useUserIdentityService.login(loginRequest), {
       loading: "Autenticando...",
       success: (data: LoginResponse) => {
         useAuthStore().login({

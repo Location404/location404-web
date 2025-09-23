@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { authService, type RegisterRequest } from '@/services/userIdentityService'
+import { useUserIdentityService, type RegisterRequest } from '@/services/userIdentityService'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
@@ -210,7 +210,7 @@ const handleRegister = async () => {
   }
 
   toast.promise(
-    authService.register(registerReRegisterRequest),
+    useUserIdentityService.register(registerReRegisterRequest),
     {
       loading: 'Criando sua conta...',
       success: () => {

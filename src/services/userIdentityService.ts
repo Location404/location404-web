@@ -13,6 +13,7 @@ const useridentity = axios.create({
 useridentity.interceptors.request.use(
   (config) => {
     const token = useAuthStore().accessToken
+    console.log('Attaching token to request:', token)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -73,7 +74,14 @@ export interface LoginResponse {
   email: string
 }
 
-export const authService = {
+export interface UserProfile {
+  id: string
+  username: string
+  email: string
+  profileImageUrl: string
+}
+
+export const useUserIdentityService = {
   async register(data: RegisterRequest): Promise<RegisterResponse> {
     const response = await useridentity.post('users', data)
     return response.data
@@ -83,4 +91,10 @@ export const authService = {
     const response = await useridentity.post('auth/login', data)
     return response.data
   },
+
+  async getUserProfile(): Promise<UserProfile> {
+    const response = await useridentity.get('users/me')
+    console.log('User Profile:', response.data)
+    return response.data
+  }
 }
