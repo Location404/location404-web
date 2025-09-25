@@ -63,8 +63,8 @@
               class="w-32 h-32 md:w-40 md:h-40 shrink-0 bg-black/20 rounded-2xl flex items-center justify-center border border-white/20 overflow-hidden"
             >
               <img
-                v-if="imagePreviewUrl"
-                :src="imagePreviewUrl"
+                v-if="imagePreview"
+                :src="imagePreview"
                 alt="Prévia do perfil"
                 class="w-full h-full object-cover"
               />
@@ -87,11 +87,12 @@
 
         <div class="flex flex-col md:flex-row gap-8 w-full">
           <label class="flex-1 flex flex-col gap-1">
-            <span>Senha (deixe em branco para não alterar):</span>
+            <span>Senha:</span>
             <input
               type="password"
               v-model="password"
               autocomplete="new-password"
+              placeholder="•••••••••••••"
               class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
             />
           </label>
@@ -101,6 +102,7 @@
               type="password"
               v-model="confirmPassword"
               autocomplete="new-password"
+              placeholder="•••••••••••••"
               class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
             />
           </label>
@@ -123,20 +125,37 @@
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import background from "../assets/bg.png";
-import { useUserIdentityService } from "@/services/userIdentityService";
-
-export interface UserProfile {
-  id: string;
-  username: string;
-  email: string;
-  profileImageUrl: string;
-}
+import { useUserIdentityService, type UserProfile } from "@/services/userIdentityService";
 
 const userProfile = ref<UserProfile | null>(null);
+const originalUserProfile = ref<UserProfile | null>(null);
 const password = ref("");
 const confirmPassword = ref("");
 const selectedFile = ref<File | null>(null);
-const imagePreviewUrl = ref<string | null>(null);
+const imagePreview = ref<string | null>(null);
+
+function getMimeTypeFromBase64(base64String: string): string {
+  if (!base64String || base64String.length < 5) {
+    return "application/octet-stream";
+  }
+
+  const signature = base64String.substring(0, 5);
+
+  switch (signature) {
+    case "/9j/4":
+      return "image/jpeg";
+    case "iVBOR":
+      return "image/png";
+    case "R0lGO":
+      return "image/gif";
+    case "UklGR":
+      return "image/webp";
+    case "Qk02A":
+      return "image/bmp";
+    default:
+      return "application/octet-stream";
+  }
+}
 
 function logout() {
   useAuthStore().logout();
@@ -147,7 +166,20 @@ async function fetchUserProfile() {
   try {
     const profileData = await useUserIdentityService.getUserProfile();
     userProfile.value = profileData;
-    imagePreviewUrl.value = profileData.profileImageUrl;
+    originalUserProfile.value = JSON.parse(JSON.stringify(profileData));
+
+    if (profileData.profileImage) {
+      const mimeType = getMimeTypeFromBase64(profileData.profileImage);
+      if (mimeType !== "application/octet-stream") {
+         imagePreview.value = `data:${mimeType};base64,${profileData.profileImage}`;
+      } else {
+        console.warn("Não foi possível determinar o tipo da imagem do perfil.");
+        imagePreview.value = null;
+      }
+    } else {
+      imagePreview.value = null;
+    }
+
   } catch (error) {
     console.error("Falha ao buscar o perfil do usuário:", error);
   }
@@ -158,12 +190,12 @@ function onFileSelected(event: Event) {
   if (target.files && target.files[0]) {
     const file = target.files[0];
     selectedFile.value = file;
-    imagePreviewUrl.value = URL.createObjectURL(file);
+    imagePreview.value = URL.createObjectURL(file);
   }
 }
 
 async function saveProfile() {
-  if (!userProfile.value) {
+  if (!userProfile.value || !originalUserProfile.value) {
     return;
   }
 
@@ -173,25 +205,50 @@ async function saveProfile() {
   }
 
   try {
-    const updatePayload = {
-      username: userProfile.value.username,
-      email: userProfile.value.email,
-      password: password.value || undefined,
-    };
-    
-    // Supondo que você tenha um método para salvar os dados e outro para o upload da imagem
-    // await useUserIdentityService.updateUserProfile(updatePayload);
-    
-    // if (selectedFile.value) {
-    //   await useUserIdentityService.updateProfileImage(selectedFile.value);
-    // }
+    const formData = new FormData();
+    let hasChanges = false;
 
-    console.log("Salvando dados:", updatePayload);
-    if(selectedFile.value) {
-      console.log("Enviando nova imagem:", selectedFile.value.name)
+    if (userProfile.value.username !== originalUserProfile.value.username) {
+      formData.append("username", userProfile.value.username ?? "");
+      hasChanges = true;
+    }
+    
+    if (userProfile.value.email !== originalUserProfile.value.email) {
+      formData.append("email", userProfile.value.email ?? "");
+      hasChanges = true;
+    }
+    
+    if (password.value && password.value.trim() !== "") {
+      formData.append("password", password.value);
+      hasChanges = true;
+    }
+    
+    if (selectedFile.value) {
+      formData.append("profileImage", selectedFile.value);
+      hasChanges = true;
     }
 
+    if (!hasChanges) {
+      alert("Nenhuma alteração foi feita.");
+      return;
+    }
+    
+    await useUserIdentityService.updateUserProfile({
+      id: useAuthStore().userStore?.userId,
+      username: userProfile.value.username,
+      email: userProfile.value.email,
+      password: password.value,
+      profileImage: selectedFile.value
+    });
+
+    console.log("Salvando dados via FormData");
     alert("Perfil salvo com sucesso!");
+    fetchUserProfile();
+    
+    password.value = "";
+    confirmPassword.value = "";
+    selectedFile.value = null;
+
   } catch (error) {
     console.error("Falha ao salvar o perfil:", error);
     alert("Ocorreu um erro ao salvar o perfil.");

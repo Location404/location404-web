@@ -1,53 +1,11 @@
 import axios from 'axios'
-import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
 
 const useridentity = axios.create({
   baseURL: '/api',
+  withCredentials: true,
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
-
-useridentity.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore().accessToken
-    console.log('Attaching token to request:', token)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
-useridentity.interceptors.response.use(
-  (response) => {
-    return response
-  },
-  async (error) => {
-    const originalRequest = error.config
-    if (error.response?.status === 401 && !originalRequest._isRetry) {
-      originalRequest._isRetry = true
-      try {
-        const refreshResponse = await useridentity.post('/auth/refresh-token')
-        const newAccessToken = refreshResponse.data.accessToken
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
-        return useridentity(originalRequest)
-      } catch (refreshError) {
-        
-        useAuthStore().logout()
-        router.push('/login')
-        return Promise.reject(refreshError)
-      }
-    }
-    return Promise.reject(error)
-  }
-)
 
 export interface RegisterRequest {
   username: string
@@ -56,9 +14,9 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  id: string,
-  username: string,
-  email: string,
+  id: string
+  username:string
+  email: string
 }
 
 export interface LoginRequest {
@@ -67,18 +25,25 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  id: string
-  accessToken: string
-  refreshToken: string
+  userId: string
   username: string
   email: string
+  profileImage: string | null
 }
 
 export interface UserProfile {
   id: string
-  username: string
-  email: string
-  profileImageUrl: string
+  username?: string
+  email?: string
+  password?: string
+  profileImage?: string
+}
+
+export interface UpdateUserProfileRequest {
+  username: string;
+  email: string;
+  password?: string;
+  profileImage?: File | null;
 }
 
 export const useUserIdentityService = {
@@ -88,13 +53,47 @@ export const useUserIdentityService = {
   },
 
   async login(data: LoginRequest): Promise<LoginResponse> {
-    const response = await useridentity.post('auth/login', data)
-    return response.data
+    const response = await useridentity.post('auth/login', data).then(res => {
+      useAuthStore().login({
+        email : res.data.email,
+        userId: res.data.userId,
+        username: res.data.username,
+        profileImage: res.data.profileImage
+      })
+
+      return res.data 
+    })
+
+    return response
   },
 
   async getUserProfile(): Promise<UserProfile> {
     const response = await useridentity.get('users/me')
-    console.log('User Profile:', response.data)
+    console.log('Fetched user profile:', response.data)
     return response.data
+  },
+
+  async updateUserProfile(data: any): Promise<UserProfile> {
+    const formData = new FormData()
+    formData.append('id', data.id)
+    formData.append('username', data.username)
+    formData.append('email', data.email)
+    formData.append('password', data.password)
+    formData.append('profileImage', data.profileImage)
+
+    const response = await useridentity.patchForm(`users/${useAuthStore().userStore?.userId}`, formData)
+    console.log('Updated user profile:', response.data)
+    return response.data
+  },
+
+  async updateUserImageProfile(imageFile: File): Promise<void> {
+    const formData = new FormData()
+    formData.append('profileImage', imageFile)
+
+    await useridentity.postForm(`users/${useAuthStore().userStore?.userId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 }

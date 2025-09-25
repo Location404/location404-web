@@ -170,10 +170,8 @@ import { ref, reactive } from "vue";
 import {
   useUserIdentityService,
   type LoginRequest,
-  type LoginResponse,
 } from "@/services/userIdentityService";
 import { toast } from "vue-sonner";
-import { useAuthStore } from "@/stores/auth";
 import router from "@/router";
 
 const loading = ref(false);
@@ -196,13 +194,7 @@ const handleLogin = async () => {
   try {
     toast.promise(useUserIdentityService.login(loginRequest), {
       loading: "Autenticando...",
-      success: (data: LoginResponse) => {
-        useAuthStore().login({
-          id: data.id,
-          email: data.email,
-          name: data.username,
-        });
-
+      success: () => {
         router.push("/play");
         return "Login realizado com sucesso!";
       },
