@@ -126,6 +126,7 @@ import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import background from "../assets/bg.png";
 import { useUserIdentityService, type UserProfile } from "@/services/userIdentityService";
+import { toast } from "vue-sonner";
 
 const userProfile = ref<UserProfile | null>(null);
 const originalUserProfile = ref<UserProfile | null>(null);
@@ -173,7 +174,7 @@ async function fetchUserProfile() {
       if (mimeType !== "application/octet-stream") {
          imagePreview.value = `data:${mimeType};base64,${profileData.profileImage}`;
       } else {
-        console.warn("Não foi possível determinar o tipo da imagem do perfil.");
+        toast.error("Tipo de imagem desconhecido. Não é possível exibir o ícone do perfil.");
         imagePreview.value = null;
       }
     } else {
@@ -181,7 +182,7 @@ async function fetchUserProfile() {
     }
 
   } catch (error) {
-    console.error("Falha ao buscar o perfil do usuário:", error);
+    toast.error("Não foi possível carregar o perfil do usuário.");
   }
 }
 
@@ -251,7 +252,7 @@ async function saveProfile() {
 
   } catch (error) {
     console.error("Falha ao salvar o perfil:", error);
-    alert("Ocorreu um erro ao salvar o perfil.");
+    toast.error("Não foi possível salvar o perfil. Tente novamente mais tarde.");
   }
 }
 

@@ -208,6 +208,7 @@ const handleLogin = async () => {
     });
   } catch (error: unknown) {
     console.error("Erro inesperado:", error);
+    loading.value = false;
   } finally {
     loading.value = false;
   }
