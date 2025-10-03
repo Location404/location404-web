@@ -184,6 +184,7 @@ const form = reactive({
 });
 
 const handleLogin = async () => {
+  console.log(import.meta.env)
   loading.value = true;
 
   const loginRequest: LoginRequest = {
