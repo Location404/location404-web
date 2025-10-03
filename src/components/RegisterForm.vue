@@ -150,7 +150,6 @@ import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserIdentityService, type RegisterRequest } from '@/services/userIdentityService'
 import { toast } from 'vue-sonner'
-import 'vue-sonner/style.css'
 
 const router = useRouter()
 
