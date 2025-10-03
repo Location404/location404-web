@@ -235,7 +235,7 @@ async function saveProfile() {
     }
     
     await useUserIdentityService.updateUserProfile({
-      id: useAuthStore().userStore?.userId,
+      userid: useAuthStore().userStore?.userId,
       username: userProfile.value.username,
       email: userProfile.value.email,
       password: password.value,
