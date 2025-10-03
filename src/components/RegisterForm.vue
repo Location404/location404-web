@@ -22,7 +22,7 @@
                 type="text"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="pedrin"
+                placeholder="Apelido"
               />
             </div>
 
@@ -36,7 +36,7 @@
                 type="email"
                 required
                 class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-200"
-                placeholder="pedrin@example.com"
+                placeholder="E-email"
               />
             </div>
 
