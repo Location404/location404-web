@@ -1,11 +1,33 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+import { config } from '@/config'
 
 const useridentity = axios.create({
   baseURL: '/api',
   withCredentials: true,
   timeout: 10000,
 })
+
+useridentity.interceptors.request.use(
+  (config) => {
+    console.log('API Request:', config.method?.toUpperCase(), config.url)
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+useridentity.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.status, response.config.url)
+    return response
+  },
+  (error) => {
+    console.error('API Error:', error.response?.status, error.config?.url, error.message)
+    return Promise.reject(error)
+  }
+)
 
 export interface RegisterRequest {
   username: string
@@ -15,7 +37,7 @@ export interface RegisterRequest {
 
 export interface RegisterResponse {
   id: string
-  username:string
+  username: string
   email: string
 }
 
@@ -40,10 +62,10 @@ export interface UserProfile {
 }
 
 export interface UpdateUserProfileRequest {
-  username: string;
-  email: string;
-  password?: string;
-  profileImage?: File | null;
+  username: string
+  email: string
+  password?: string
+  profileImage?: File | null
 }
 
 export const useUserIdentityService = {
@@ -55,13 +77,13 @@ export const useUserIdentityService = {
   async login(data: LoginRequest): Promise<LoginResponse> {
     const response = await useridentity.post('auth/login', data).then(res => {
       useAuthStore().login({
-        email : res.data.email,
+        email: res.data.email,
         userId: res.data.userId,
         username: res.data.username,
         profileImage: res.data.profileImage
       })
 
-      return res.data 
+      return res.data
     })
 
     return response
