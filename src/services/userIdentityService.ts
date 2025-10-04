@@ -25,7 +25,7 @@ const useridentity = axios.create({
 })
 
 useridentity.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url)
     return config
   },
