@@ -1,20 +1,20 @@
 FROM node:20-alpine as builder
+
 WORKDIR /app
+
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 COPY package.json package-lock.json ./
 
 RUN npm ci
-
 COPY . .
 RUN npm run build
 
 FROM node:20-alpine
-
 WORKDIR /app
 RUN npm install -g serve
 COPY --from=builder /app/dist /app/dist
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 3400
-ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["serve", "-s", "dist", "-l", "3400"]

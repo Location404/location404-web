@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
-import { config } from '@/config'
 
 const useridentity = axios.create({
   baseURL: '/api',
   withCredentials: true,
   timeout: 10000,
 })
+
 
 useridentity.interceptors.request.use(
   (config) => {
@@ -119,3 +119,4 @@ export const useUserIdentityService = {
     })
   }
 }
+
