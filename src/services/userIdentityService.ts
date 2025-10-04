@@ -1,16 +1,32 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
+const getBaseURL = () => {
+  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  
+  if (import.meta.env.DEV) {
+    console.log('Development mode: using proxy /api')
+    return '/api'
+  }
+  
+  if (apiUrl) {
+    console.log('Production mode: using', apiUrl + '/api')
+    return apiUrl + '/api'
+  }
+  
+  console.warn('VITE_API_BASE_URL not set, using /api')
+  return '/api'
+}
+
 const useridentity = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseURL(),
   withCredentials: true,
   timeout: 10000,
 })
 
-
 useridentity.interceptors.request.use(
   (config) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url)
+    console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url)
     return config
   },
   (error) => {
@@ -119,4 +135,3 @@ export const useUserIdentityService = {
     })
   }
 }
-
