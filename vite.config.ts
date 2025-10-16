@@ -19,19 +19,21 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        '/api': {
-          target: env.VITE_API_BASE_URL || 'http://localhost:3000',
+        '/useridentityapi': {
+          target: env.VITE_USER_IDENTITY_API || 'http://localhost:3000',
           changeOrigin: true,
           secure: false,
+          rewrite: (path) => path.replace(/^\/useridentityapi/, '/api')
         }
       }
     },
     preview: {
       proxy: {
-        '/api': {
-          target: env.VITE_API_BASE_URL || 'http://localhost:3000',
+        '/useridentityapi': {
+          target: env.VITE_USER_IDENTITY_API || 'http://localhost:3000',
           changeOrigin: true,
           secure: false,
+          rewrite: (path) => path.replace(/^\/useridentityapi/, '/api')
         }
       }
     }

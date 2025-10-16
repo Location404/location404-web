@@ -2,20 +2,21 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
 const getBaseURL = () => {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL
+  const apiUrl = import.meta.env.VITE_USER_IDENTITY_API
+  console.log('VITE_USER_IDENTITY_API:', apiUrl)
   
   if (import.meta.env.DEV) {
     console.log('Development mode: using proxy /api')
-    return '/api'
+    return '/useridentityapi'
   }
   
   if (apiUrl) {
-    console.log('Production mode: using', apiUrl + '/api')
-    return apiUrl + '/api'
+    console.log('Production mode: using', apiUrl + '/useridentityapi')
+    return apiUrl + '/useridentityapi'
   }
   
-  console.warn('VITE_API_BASE_URL not set, using /api')
-  return '/api'
+  console.warn('VITE_USER_IDENTITY_API not set, using /useridentityapi')
+  return '/useridentityapi'
 }
 
 const useridentity = axios.create({
