@@ -11,7 +11,7 @@
         
         <button
           type="button"
-          class="relative flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-full text-white bg-white/10 hover:bg-white/20 focus:outline-none transition-all duration-200"
+          class="relative flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-full text-white bg-white/10 hover:bg-white/20 transition-all duration-200"
           aria-label="Play">
           
           <svg class="w-12 h-12 sm:w-14 sm:h-14" viewBox="0 0 24 24" fill="currentColor">
