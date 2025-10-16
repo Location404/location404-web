@@ -183,6 +183,7 @@ async function fetchUserProfile() {
 
   } catch (error) {
     toast.error("Não foi possível carregar o perfil do usuário.");
+    logout();
   }
 }
 
