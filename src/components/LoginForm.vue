@@ -144,7 +144,7 @@
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              {{ loading ? "Entrando..." : "Entrar" }}
+              {{ loading ? 'Entrando...' : 'Entrar' }}
             </button>
           </div>
 
@@ -152,7 +152,7 @@
             <p class="text-white/80">
               Não tem uma conta?
               <router-link
-                to="/register"
+                :to="ROUTE_PATHS.REGISTER"
                 class="font-medium text-green-light hover:text-green-medium transition-colors"
               >
                 Cadastre-se aqui
@@ -166,52 +166,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-import {
-  useUserIdentityService,
-  type LoginRequest,
-} from "@/services/userIdentityService";
-import { toast } from "vue-sonner";
-import router from "@/router";
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserIdentityService, useToast } from '@/composables'
+import { ROUTE_PATHS, ROUTE_NAMES } from '@/config/constants'
+import type { LoginRequest } from '@/types'
 
-const loading = ref(false);
-const showPassword = ref(false);
+const router = useRouter()
+const userIdentityService = useUserIdentityService()
+const { promise: toastPromise } = useToast()
+
+const loading = ref(false)
+const showPassword = ref(false)
 
 const form = reactive({
-  email: "",
-  password: "",
+  email: '',
+  password: '',
   remember: false,
-});
+})
 
 const handleLogin = async () => {
-  console.log(import.meta.env)
-  loading.value = true;
+  loading.value = true
 
   const loginRequest: LoginRequest = {
     email: form.email,
     password: form.password,
-  };
+  }
 
   try {
-    toast.promise(useUserIdentityService.login(loginRequest), {
-      loading: "Autenticando...",
-      success: () => {
-        router.push("/play");
-        return "Login realizado com sucesso!";
-      },
-      error: (err: any) => {
-        return (
-          err.message ||
-          err.response?.data?.message ||
-          "Erro ao fazer login. Tente novamente mais tarde."
-        );
-      },
-    });
+    await toastPromise(userIdentityService.login(loginRequest), {
+      loading: 'Autenticando...',
+      success: 'Login realizado com sucesso!',
+      error: 'Erro ao fazer login. Tente novamente mais tarde.',
+    })
+
+    router.push({ name: ROUTE_NAMES.PLAY })
   } catch (error: unknown) {
-    console.error("Erro inesperado:", error);
-    loading.value = false;
+    console.error('Erro ao fazer login:', error)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 </script>
