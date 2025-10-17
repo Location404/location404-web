@@ -2,8 +2,13 @@ FROM node:20-alpine as builder
 
 WORKDIR /app
 
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# Build arguments for multiple API services
+ARG VITE_USER_IDENTITY_API
+ARG VITE_GAME_ENGINE_API
+
+# Environment variables for build time
+ENV VITE_USER_IDENTITY_API=$VITE_USER_IDENTITY_API
+ENV VITE_GAME_ENGINE_API=$VITE_GAME_ENGINE_API
 
 COPY package.json package-lock.json ./
 
