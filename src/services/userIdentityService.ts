@@ -1,138 +1,110 @@
-import axios from 'axios'
+/**
+ * User Identity Service
+ * Handles authentication and user profile management
+ */
+
+import type { AxiosInstance } from 'axios'
+import { apiClients } from '@/config/axios.config'
 import { useAuthStore } from '@/stores/auth'
+import type {
+  IUserIdentityService,
+  RegisterRequest,
+  RegisterResponse,
+  LoginRequest,
+  LoginResponse,
+  UserProfile,
+  UpdateUserProfileRequest,
+} from '@/types'
 
-const getBaseURL = () => {
-  const apiUrl = import.meta.env.VITE_USER_IDENTITY_API
-  console.log('VITE_USER_IDENTITY_API:', apiUrl)
-  
-  if (import.meta.env.DEV) {
-    console.log('Development mode: using proxy /api')
-    return '/useridentityapi'
+export class UserIdentityService implements IUserIdentityService {
+  private readonly client: AxiosInstance
+
+  constructor() {
+    this.client = apiClients.userIdentity
   }
-  
-  if (apiUrl) {
-    console.log('Production mode: using', apiUrl + '/useridentityapi')
-    return apiUrl + '/useridentityapi'
-  }
-  
-  console.warn('VITE_USER_IDENTITY_API not set, using /useridentityapi')
-  return '/useridentityapi'
-}
 
-const useridentity = axios.create({
-  baseURL: getBaseURL(),
-  withCredentials: true,
-  timeout: 10000,
-})
-
-useridentity.interceptors.request.use(
-  (config: any) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url)
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
-useridentity.interceptors.response.use(
-  (response) => {
-    console.log('API Response:', response.status, response.config.url)
-    return response
-  },
-  (error) => {
-    console.error('API Error:', error.response?.status, error.config?.url, error.message)
-    return Promise.reject(error)
-  }
-)
-
-export interface RegisterRequest {
-  username: string
-  email: string
-  password: string
-}
-
-export interface RegisterResponse {
-  id: string
-  username: string
-  email: string
-}
-
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-export interface LoginResponse {
-  userId: string
-  username: string
-  email: string
-  profileImage: string | null
-}
-
-export interface UserProfile {
-  id: string
-  username?: string
-  email?: string
-  password?: string
-  profileImage?: string
-}
-
-export interface UpdateUserProfileRequest {
-  username: string
-  email: string
-  password?: string
-  profileImage?: File | null
-}
-
-export const useUserIdentityService = {
+  /**
+   * Register a new user
+   */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
-    const response = await useridentity.post('users', data)
+    const response = await this.client.post<RegisterResponse>('users', data)
     return response.data
-  },
+  }
 
+  /**
+   * Login user and update auth store
+   */
   async login(data: LoginRequest): Promise<LoginResponse> {
-    const response = await useridentity.post('auth/login', data).then(res => {
-      useAuthStore().login({
-        email: res.data.email,
-        userId: res.data.userId,
-        username: res.data.username,
-        profileImage: res.data.profileImage
-      })
+    const response = await this.client.post<LoginResponse>('auth/login', data)
 
-      return res.data
+    // Update auth store
+    const authStore = useAuthStore()
+    await authStore.login({
+      email: response.data.email,
+      userId: response.data.userId,
+      username: response.data.username,
+      profileImage: response.data.profileImage,
     })
 
-    return response
-  },
+    return response.data
+  }
 
+  /**
+   * Get current user profile
+   */
   async getUserProfile(): Promise<UserProfile> {
-    const response = await useridentity.get('users/me')
+    const response = await this.client.get<UserProfile>('users/me')
     console.log('Fetched user profile:', response.data)
     return response.data
-  },
+  }
 
-  async updateUserProfile(data: any): Promise<UserProfile> {
+  /**
+   * Update user profile
+   */
+  async updateUserProfile(data: UpdateUserProfileRequest): Promise<UserProfile> {
     const formData = new FormData()
     formData.append('id', data.id)
     formData.append('username', data.username)
     formData.append('email', data.email)
-    formData.append('password', data.password)
-    formData.append('profileImage', data.profileImage)
 
-    const response = await useridentity.patchForm(`users/${useAuthStore().userStore?.userId}`, formData)
+    if (data.password) {
+      formData.append('password', data.password)
+    }
+
+    if (data.profileImage) {
+      formData.append('profileImage', data.profileImage)
+    }
+
+    const authStore = useAuthStore()
+    const userId = authStore.userStore?.userId
+
+    if (!userId) {
+      throw new Error('User not authenticated')
+    }
+
+    const response = await this.client.patchForm<UserProfile>(`users/${userId}`, formData)
     console.log('Updated user profile:', response.data)
     return response.data
-  },
+  }
 
+  /**
+   * Update user profile image
+   */
   async updateUserImageProfile(imageFile: File): Promise<void> {
     const formData = new FormData()
     formData.append('profileImage', imageFile)
 
-    await useridentity.postForm(`users/${useAuthStore().userStore?.userId}`, formData, {
+    const authStore = useAuthStore()
+    const userId = authStore.userStore?.userId
+
+    if (!userId) {
+      throw new Error('User not authenticated')
+    }
+
+    await this.client.postForm(`users/${userId}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
   }
 }
