@@ -16,7 +16,7 @@
         </button>
         <button
           class="py-2 px-4 rounded-lg bg-red-500/80 text-white font-semibold hover:bg-red-600 transition text-left"
-          @click="logout"
+          @click="handleLogout"
         >
           Desconectar
         </button>
@@ -111,9 +111,10 @@
         <div class="flex justify-end mt-4">
           <button
             type="submit"
-            class="py-2 px-6 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition"
+            :disabled="loading"
+            class="py-2 px-6 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Salvar
+            {{ loading ? 'Salvando...' : 'Salvar' }}
           </button>
         </div>
       </form>
@@ -122,142 +123,116 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import background from "../assets/bg.png";
-import { useUserIdentityService, type UserProfile } from "@/services/userIdentityService";
-import { toast } from "vue-sonner";
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useUserIdentityService, useToast } from '@/composables'
+import { ROUTE_NAMES } from '@/config/constants'
+import { base64ToDataUrl, createImagePreview } from '@/utils/image-utils'
+import type { UserProfile } from '@/types'
+import background from '../assets/bg.png'
 
-const userProfile = ref<UserProfile | null>(null);
-const originalUserProfile = ref<UserProfile | null>(null);
-const password = ref("");
-const confirmPassword = ref("");
-const selectedFile = ref<File | null>(null);
-const imagePreview = ref<string | null>(null);
+const router = useRouter()
+const authStore = useAuthStore()
+const userIdentityService = useUserIdentityService()
+const { success: toastSuccess, error: toastError } = useToast()
 
-function getMimeTypeFromBase64(base64String: string): string {
-  if (!base64String || base64String.length < 5) {
-    return "application/octet-stream";
-  }
+const userProfile = ref<UserProfile | null>(null)
+const originalUserProfile = ref<UserProfile | null>(null)
+const password = ref('')
+const confirmPassword = ref('')
+const selectedFile = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
+const loading = ref(false)
 
-  const signature = base64String.substring(0, 5);
-
-  switch (signature) {
-    case "/9j/4":
-      return "image/jpeg";
-    case "iVBOR":
-      return "image/png";
-    case "R0lGO":
-      return "image/gif";
-    case "UklGR":
-      return "image/webp";
-    case "Qk02A":
-      return "image/bmp";
-    default:
-      return "application/octet-stream";
-  }
-}
-
-function logout() {
-  useAuthStore().logout();
-  window.location.reload();
+function handleLogout() {
+  authStore.logout()
+  router.push({ name: ROUTE_NAMES.LOGIN })
 }
 
 async function fetchUserProfile() {
   try {
-    const profileData = await useUserIdentityService.getUserProfile();
-    userProfile.value = profileData;
-    originalUserProfile.value = JSON.parse(JSON.stringify(profileData));
+    const profileData = await userIdentityService.getUserProfile()
+    userProfile.value = profileData
+    originalUserProfile.value = JSON.parse(JSON.stringify(profileData))
 
     if (profileData.profileImage) {
-      const mimeType = getMimeTypeFromBase64(profileData.profileImage);
-      if (mimeType !== "application/octet-stream") {
-         imagePreview.value = `data:${mimeType};base64,${profileData.profileImage}`;
+      const dataUrl = base64ToDataUrl(profileData.profileImage)
+      if (dataUrl) {
+        imagePreview.value = dataUrl
       } else {
-        toast.error("Tipo de imagem desconhecido. Não é possível exibir o ícone do perfil.");
-        imagePreview.value = null;
+        toastError('Tipo de imagem desconhecido. Não é possível exibir o ícone do perfil.')
+        imagePreview.value = null
       }
     } else {
-      imagePreview.value = null;
+      imagePreview.value = null
     }
-
   } catch (error) {
-    toast.error("Não foi possível carregar o perfil do usuário.");
-    logout();
+    toastError(error, 'Não foi possível carregar o perfil do usuário.')
+    handleLogout()
   }
 }
 
 function onFileSelected(event: Event) {
-  const target = event.target as HTMLInputElement;
+  const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    const file = target.files[0];
-    selectedFile.value = file;
-    imagePreview.value = URL.createObjectURL(file);
+    const file = target.files[0]
+    selectedFile.value = file
+    imagePreview.value = createImagePreview(file)
   }
 }
 
 async function saveProfile() {
   if (!userProfile.value || !originalUserProfile.value) {
-    return;
+    return
   }
 
-  if (password.value !== confirmPassword.value) {
-    alert("As senhas não conferem!");
-    return;
+  if (password.value && password.value !== confirmPassword.value) {
+    toastError('As senhas não conferem!')
+    return
   }
+
+  // Check if there are changes
+  const hasProfileChanges =
+    userProfile.value.username !== originalUserProfile.value.username ||
+    userProfile.value.email !== originalUserProfile.value.email ||
+    (password.value && password.value.trim() !== '') ||
+    selectedFile.value !== null
+
+  if (!hasProfileChanges) {
+    toastError('Nenhuma alteração foi feita.')
+    return
+  }
+
+  loading.value = true
 
   try {
-    const formData = new FormData();
-    let hasChanges = false;
+    await userIdentityService.updateUserProfile({
+      id: userProfile.value.id,
+      username: userProfile.value.username || '',
+      email: userProfile.value.email || '',
+      password: password.value || undefined,
+      profileImage: selectedFile.value,
+    })
 
-    if (userProfile.value.username !== originalUserProfile.value.username) {
-      formData.append("username", userProfile.value.username ?? "");
-      hasChanges = true;
-    }
-    
-    if (userProfile.value.email !== originalUserProfile.value.email) {
-      formData.append("email", userProfile.value.email ?? "");
-      hasChanges = true;
-    }
-    
-    if (password.value && password.value.trim() !== "") {
-      formData.append("password", password.value);
-      hasChanges = true;
-    }
-    
-    if (selectedFile.value) {
-      formData.append("profileImage", selectedFile.value);
-      hasChanges = true;
-    }
+    toastSuccess('Perfil salvo com sucesso!')
 
-    if (!hasChanges) {
-      alert("Nenhuma alteração foi feita.");
-      return;
-    }
-    
-    await useUserIdentityService.updateUserProfile({
-      userid: useAuthStore().userStore?.userId,
-      username: userProfile.value.username,
-      email: userProfile.value.email,
-      password: password.value,
-      profileImage: selectedFile.value
-    });
+    // Refresh profile
+    await fetchUserProfile()
 
-    console.log("Salvando dados via FormData");
-    alert("Perfil salvo com sucesso!");
-    fetchUserProfile();
-    
-    password.value = "";
-    confirmPassword.value = "";
-    selectedFile.value = null;
-
+    // Clear password fields
+    password.value = ''
+    confirmPassword.value = ''
+    selectedFile.value = null
   } catch (error) {
-    console.error("Falha ao salvar o perfil:", error);
-    toast.error("Não foi possível salvar o perfil. Tente novamente mais tarde.");
+    console.error('Falha ao salvar o perfil:', error)
+    toastError(error, 'Não foi possível salvar o perfil. Tente novamente mais tarde.')
+  } finally {
+    loading.value = false
   }
 }
 
 onMounted(() => {
-  fetchUserProfile();
-});
+  fetchUserProfile()
+})
 </script>
