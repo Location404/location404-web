@@ -24,9 +24,30 @@ export interface IUserIdentityService {
 /**
  * Game Engine Service Interface
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IGameEngineService {
-  // To be implemented when game engine is ready
+  // SignalR connection (auth via cookies)
+  connect(): Promise<void>
+  disconnect(): Promise<void>
+  isConnected(): boolean
+
+  // Matchmaking
+  joinMatchmaking(request: import('./game.types').JoinMatchmakingRequest): Promise<string>
+  leaveMatchmaking(playerId: string): Promise<void>
+
+  // Game actions
+  startRound(request: import('./game.types').StartRoundRequest): Promise<void>
+  submitGuess(request: import('./game.types').SubmitGuessRequest): Promise<void>
+  getMatchStatus(matchId: string): Promise<void>
+
+  // Event handlers
+  onMatchFound: ((data: import('./game.types').MatchFoundResponse) => void) | null
+  onRoundStarted: ((data: import('./game.types').RoundStartedResponse) => void) | null
+  onGuessSubmitted: ((message: string) => void) | null
+  onRoundEnded: ((data: import('./game.types').RoundEndedResponse) => void) | null
+  onMatchEnded: ((data: import('./game.types').MatchEndedResponse) => void) | null
+  onMatchStatus: ((match: import('./game.types').GameMatch) => void) | null
+  onLeftQueue: ((message: string) => void) | null
+  onError: ((message: string) => void) | null
 }
 
 /**
