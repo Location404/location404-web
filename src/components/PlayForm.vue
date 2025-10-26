@@ -226,13 +226,14 @@ import { onMounted } from 'vue'
 import { useGameEngine } from '@/composables'
 import { useAuthStore } from '@/stores/auth'
 import { GameStatus } from '@/types'
+import { ENV_KEYS } from '@/config/constants'
 import StreetViewPanorama from './StreetViewPanorama.vue'
 import GuessMap from './GuessMap.vue'
 import RoundResult from './RoundResult.vue'
 import MatchResult from './MatchResult.vue'
 import background from '@/assets/bg.png'
 
-const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
+const googleMapsApiKey = import.meta.env[ENV_KEYS.GOOGLE_MAPS_API_KEY] || ''
 const authStore = useAuthStore()
 
 const {

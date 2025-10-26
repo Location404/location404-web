@@ -20,7 +20,7 @@ export class UserIdentityService implements IUserIdentityService {
   private readonly client: AxiosInstance
 
   constructor() {
-    this.client = apiClients.userIdentity
+    this.client = apiClients.auth
   }
 
   /**

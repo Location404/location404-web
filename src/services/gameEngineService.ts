@@ -15,6 +15,7 @@ import type {
   MatchEndedResponse,
   GameMatch,
 } from '@/types/game.types'
+import { ENV_KEYS } from '@/config/constants'
 
 export class GameEngineService implements IGameEngineService {
   private connection: signalR.HubConnection | null = null
@@ -32,7 +33,7 @@ export class GameEngineService implements IGameEngineService {
 
   constructor() {
     // Get base URL from environment
-    const apiUrl = import.meta.env.VITE_GAME_ENGINE_API || 'http://localhost:5000'
+    const apiUrl = import.meta.env[ENV_KEYS.GAME_API] || 'http://localhost:5170'
     this.hubUrl = `${apiUrl}/gamehub`
   }
 

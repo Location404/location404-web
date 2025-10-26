@@ -9,21 +9,26 @@ import { API_CONSTANTS, ENV_KEYS } from './constants'
  * Service type enum
  */
 export enum ApiService {
-  USER_IDENTITY = 'USER_IDENTITY',
-  GAME_ENGINE = 'GAME_ENGINE',
+  AUTH = 'AUTH',
+  GAME = 'GAME',
+  DATA = 'DATA',
 }
 
 /**
  * Configuration for each API service
  */
 const SERVICE_CONFIG = {
-  [ApiService.USER_IDENTITY]: {
-    envKey: ENV_KEYS.USER_IDENTITY_API,
-    basePath: API_CONSTANTS.USER_IDENTITY_PATH,
+  [ApiService.AUTH]: {
+    envKey: ENV_KEYS.AUTH_API,
+    basePath: API_CONSTANTS.AUTH_PATH,
   },
-  [ApiService.GAME_ENGINE]: {
-    envKey: ENV_KEYS.GAME_ENGINE_API,
-    basePath: API_CONSTANTS.GAME_ENGINE_PATH,
+  [ApiService.GAME]: {
+    envKey: ENV_KEYS.GAME_API,
+    basePath: API_CONSTANTS.GAME_PATH,
+  },
+  [ApiService.DATA]: {
+    envKey: ENV_KEYS.DATA_API,
+    basePath: API_CONSTANTS.DATA_PATH,
   },
 } as const
 
@@ -91,6 +96,7 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
  * Pre-configured axios instances for each service
  */
 export const apiClients = {
-  userIdentity: createApiClient(ApiService.USER_IDENTITY),
-  gameEngine: createApiClient(ApiService.GAME_ENGINE),
+  auth: createApiClient(ApiService.AUTH),
+  game: createApiClient(ApiService.GAME),
+  data: createApiClient(ApiService.DATA),
 } as const

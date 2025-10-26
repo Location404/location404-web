@@ -4,8 +4,9 @@
 
 export const API_CONSTANTS = {
   TIMEOUT: 10000,
-  USER_IDENTITY_PATH: '/useridentityapi',
-  GAME_ENGINE_PATH: '/gameengineapi',
+  AUTH_PATH: '/api',
+  GAME_PATH: '/api',
+  DATA_PATH: '/api',
 } as const
 
 export const STORAGE_KEYS = {
@@ -29,6 +30,8 @@ export const ROUTE_PATHS = {
 } as const
 
 export const ENV_KEYS = {
-  USER_IDENTITY_API: 'VITE_USER_IDENTITY_API',
-  GAME_ENGINE_API: 'VITE_GAME_ENGINE_API',
+  AUTH_API: 'VITE_AUTH_API',
+  GAME_API: 'VITE_GAME_API',
+  DATA_API: 'VITE_DATA_API',
+  GOOGLE_MAPS_API_KEY: 'VITE_GOOGLE_MAPS_API_KEY',
 } as const
