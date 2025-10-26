@@ -34,16 +34,12 @@ export const getBaseURL = (service: ApiService): string => {
   const config = SERVICE_CONFIG[service]
   const apiUrl = import.meta.env[config.envKey]
 
-  console.log(`${service} - ${config.envKey}:`, apiUrl)
-
   if (import.meta.env.DEV) {
-    console.log(`${service} - Development mode: using proxy ${config.basePath}`)
     return config.basePath
   }
 
   if (apiUrl) {
     const fullUrl = apiUrl + config.basePath
-    console.log(`${service} - Production mode: using`, fullUrl)
     return fullUrl
   }
 
@@ -64,8 +60,6 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
   // Request interceptor
   client.interceptors.request.use(
     (config) => {
-      const url = `${config.baseURL || ''}${config.url || ''}`
-      console.log(`[${service}] Request:`, config.method?.toUpperCase(), url)
       return config
     },
     (error) => {
@@ -77,7 +71,6 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
   // Response interceptor
   client.interceptors.response.use(
     (response) => {
-      console.log(`[${service}] Response:`, response.status, response.config.url)
       return response
     },
     (error) => {

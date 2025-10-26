@@ -35,10 +35,43 @@ export const useGameEngine = () => {
   })
 
   const isConnected = ref(false)
+  const countdownSeconds = ref(0)
+  let countdownTimer: number | null = null
+
   const isSearching = computed(() => state.value.matchmakingStatus === MatchmakingStatus.SEARCHING)
-  const inMatch = computed(() => state.value.currentMatch !== null)
+  const inMatch = computed(() =>
+    state.value.currentMatch !== null &&
+    state.value.matchmakingStatus !== MatchmakingStatus.MATCH_FOUND
+  )
   const currentPlayerId = computed(() => authStore.userStore?.userId || '')
   const isPlayerA = computed(() => state.value.currentMatch?.playerAId === currentPlayerId.value)
+  const isMatchFound = computed(() => state.value.matchmakingStatus === MatchmakingStatus.MATCH_FOUND)
+
+  /**
+   * Start countdown timer
+   */
+  const startCountdown = (seconds: number) => {
+    countdownSeconds.value = seconds
+
+    // Clear any existing timer
+    if (countdownTimer) {
+      clearInterval(countdownTimer)
+    }
+
+    countdownTimer = setInterval(() => {
+      countdownSeconds.value--
+      if (countdownSeconds.value <= 0) {
+        if (countdownTimer) {
+          clearInterval(countdownTimer)
+          countdownTimer = null
+        }
+        // Only PlayerA starts the round to avoid race condition
+        if (isPlayerA.value) {
+          startRound()
+        }
+      }
+    }, 1000) as unknown as number
+  }
 
   /**
    * Connect to SignalR hub
@@ -65,6 +98,12 @@ export const useGameEngine = () => {
    * Disconnect from SignalR hub
    */
   const disconnect = async () => {
+    // Clear countdown timer
+    if (countdownTimer) {
+      clearInterval(countdownTimer)
+      countdownTimer = null
+    }
+
     await gameService.disconnect()
     isConnected.value = false
     resetState()
@@ -102,6 +141,9 @@ export const useGameEngine = () => {
       console.log('[useGameEngine] New matchmaking status:', state.value.matchmakingStatus)
 
       toastSuccess('Partida encontrada! Iniciando...')
+
+      // Start countdown
+      startCountdown(3)
     }
 
     // Round Started
@@ -109,6 +151,7 @@ export const useGameEngine = () => {
       console.log('[useGameEngine] RoundStarted event received:', data)
       console.log('[useGameEngine] Location data:', data.location)
 
+      state.value.matchmakingStatus = MatchmakingStatus.IDLE
       state.value.gameStatus = GameStatus.ROUND_ACTIVE
       state.value.currentLocation = data.location
       state.value.currentRound = {
@@ -375,6 +418,8 @@ export const useGameEngine = () => {
     isSearching,
     inMatch,
     isPlayerA,
+    isMatchFound,
+    countdownSeconds,
 
     // Actions
     connect,

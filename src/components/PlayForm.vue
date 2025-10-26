@@ -16,10 +16,10 @@
         <StreetViewPanorama :location="state.currentLocation" :api-key="googleMapsApiKey" />
       </div>
 
-      <!-- Main Content Overlay (only for idle/searching) -->
+      <!-- Main Content Overlay (only for idle/searching/match-found) -->
       <div v-if="!inMatch" class="relative z-10 w-full flex-1 flex flex-col">
         <!-- Matchmaking: Idle State - Show Play Button -->
-        <div v-if="!isSearching" class="flex-1 flex items-center justify-center">
+        <div v-if="!isSearching && !isMatchFound" class="flex-1 flex items-center justify-center">
           <button
             type="button"
             @click="handleFindMatch"
@@ -66,6 +66,47 @@
             </button>
           </div>
         </div>
+
+        <!-- Match Found: Countdown State -->
+        <div v-if="isMatchFound" class="flex-1 flex items-center justify-center">
+          <div class="flex flex-col items-center gap-6 bg-black/60 backdrop-blur-md rounded-2xl p-8">
+            <p class="text-white text-2xl font-bold mb-2">Partida Encontrada!</p>
+            <div class="relative flex items-center justify-center">
+              <!-- Countdown Circle Progress -->
+              <svg class="w-32 h-32 transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="currentColor"
+                  stroke-width="6"
+                  fill="none"
+                  class="text-white/20"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="currentColor"
+                  stroke-width="6"
+                  fill="none"
+                  class="text-green-500 transition-all duration-1000 ease-linear"
+                  :style="{
+                    strokeDasharray: `${2 * Math.PI * 56}`,
+                    strokeDashoffset: `${Math.max(0, 2 * Math.PI * 56 * (1 - Math.min(1, countdownSeconds / 3)))}`
+
+                  }"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <!-- Countdown Number -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-6xl font-black text-white">{{ countdownSeconds }}</span>
+              </div>
+            </div>
+            <p class="text-white/80 text-lg">Iniciando em...</p>
+          </div>
+        </div>
       </div>
 
       <!-- Game Screen: Match Found (separate layer, same level as Street View) -->
@@ -106,15 +147,6 @@
                 Rodada <span class="font-bold">{{ state.currentRound.roundNumber }}</span> de 3
               </p>
             </div>
-
-            <!-- Start Round Button (when no round active) -->
-            <button
-              v-if="!state.currentRound"
-              @click="handleStartRound"
-              class="px-4 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-bold rounded-lg transition"
-            >
-              Iniciar Rodada
-            </button>
           </div>
         </div>
 
@@ -160,6 +192,8 @@
         :correct-answer="state.currentRound.gameResponse"
         :player-a-guess="state.currentRound.playerAGuess!"
         :player-b-guess="state.currentRound.playerBGuess!"
+
+
         :player-a-points="state.currentRound.playerAPoints"
         :player-b-points="state.currentRound.playerBPoints"
         :player-a-total-points="state.currentMatch?.playerATotalPoints ?? null"
@@ -206,6 +240,8 @@ const {
   isSearching,
   inMatch,
   isPlayerA,
+  isMatchFound,
+  countdownSeconds,
   connect,
   joinMatchmaking,
   leaveMatchmaking,
@@ -224,10 +260,6 @@ const handleFindMatch = async () => {
 
 const handleLeaveQueue = async () => {
   await leaveMatchmaking()
-}
-
-const handleStartRound = async () => {
-  await startRound()
 }
 
 const handleConfirmGuess = async () => {

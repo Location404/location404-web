@@ -4,10 +4,9 @@
 
 export interface UserProfile {
   id: string
-  username?: string
-  email?: string
-  password?: string
-  profileImage?: string
+  username: string
+  email: string
+  profileImage: string
 }
 
 export interface UpdateUserProfileRequest {

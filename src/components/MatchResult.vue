@@ -1,6 +1,6 @@
 <template>
-  <div class="absolute inset-0 bg-black/95 backdrop-blur-lg z-50 flex items-center justify-center">
-    <div class="w-[90%] max-w-4xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border-2 border-white/20 overflow-hidden">
+  <div class="absolute inset-0 bg-black/95 backdrop-blur-lg z-50 flex items-center justify-center p-2 md:p-4">
+    <div class="w-full h-full max-w-7xl bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl border-2 border-white/20 overflow-hidden flex flex-col">
       <!-- Header with Result -->
       <div class="relative overflow-hidden">
         <!-- Background Animation -->
@@ -12,19 +12,19 @@
         </div>
 
         <!-- Content -->
-        <div class="relative z-10 p-12 text-center text-white">
-          <div class="mb-6">
-            <div class="text-7xl mb-4">{{ isWinner ? '🏆' : '😔' }}</div>
-            <h1 class="text-5xl font-black mb-2">{{ isWinner ? 'VITÓRIA!' : 'DERROTA' }}</h1>
-            <p class="text-2xl font-semibold opacity-90">
+        <div class="relative z-10 p-8 text-center text-white">
+          <div class="mb-4">
+            <div class="text-6xl mb-3">{{ isWinner ? '🏆' : '😔' }}</div>
+            <h1 class="text-4xl font-black mb-2">{{ isWinner ? 'VITÓRIA!' : 'DERROTA' }}</h1>
+            <p class="text-xl font-semibold opacity-90">
               {{ isWinner ? 'Parabéns! Você venceu a partida!' : 'Quase lá! Continue treinando!' }}
             </p>
           </div>
 
           <!-- Points Change -->
-          <div class="inline-block bg-black/30 backdrop-blur-sm rounded-xl px-8 py-4 border border-white/20">
-            <p class="text-sm uppercase tracking-wider opacity-80 mb-1">Pontos de Ranking</p>
-            <p class="text-4xl font-bold"
+          <div class="inline-block bg-black/30 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/20">
+            <p class="text-xs uppercase tracking-wider opacity-80 mb-1">Pontos de Ranking</p>
+            <p class="text-3xl font-bold"
                :class="isWinner ? 'text-green-300' : 'text-red-300'">
               {{ isWinner ? '+' : '-' }}{{ pointsChange }}
             </p>
@@ -33,22 +33,22 @@
       </div>
 
       <!-- Match Stats -->
-      <div class="p-8 space-y-6">
+      <div class="flex-1 p-4 md:p-6 space-y-4 overflow-y-auto">
         <!-- Score Comparison -->
-        <div class="bg-gray-800/60 rounded-xl p-6 border border-white/10">
-          <h3 class="text-lg font-bold text-white mb-4 text-center">Placar Final</h3>
-          <div class="flex justify-center items-center gap-8">
+        <div class="bg-gray-800/60 rounded-xl p-5 border border-white/10">
+          <h3 class="text-base font-bold text-white mb-3 text-center">Placar Final</h3>
+          <div class="flex justify-center items-center gap-6">
             <div class="text-center">
-              <div class="text-sm text-white/60 mb-2">Você</div>
-              <div class="text-5xl font-bold"
+              <div class="text-xs text-white/60 mb-1">Você</div>
+              <div class="text-4xl font-bold"
                    :class="isWinner ? 'text-green-400' : 'text-red-400'">
                 {{ myTotalPoints }}
               </div>
             </div>
-            <div class="text-3xl text-white/40 font-bold">—</div>
+            <div class="text-2xl text-white/40 font-bold">—</div>
             <div class="text-center">
-              <div class="text-sm text-white/60 mb-2">Oponente</div>
-              <div class="text-5xl font-bold"
+              <div class="text-xs text-white/60 mb-1">Oponente</div>
+              <div class="text-4xl font-bold"
                    :class="!isWinner ? 'text-green-400' : 'text-red-400'">
                 {{ opponentTotalPoints }}
               </div>
@@ -57,17 +57,17 @@
         </div>
 
         <!-- Round by Round -->
-        <div class="bg-gray-800/60 rounded-xl p-6 border border-white/10">
-          <h3 class="text-lg font-bold text-white mb-4">Desempenho por Rodada</h3>
-          <div class="space-y-3">
+        <div class="bg-gray-800/60 rounded-xl p-5 border border-white/10">
+          <h3 class="text-base font-bold text-white mb-3">Desempenho por Rodada</h3>
+          <div class="space-y-2">
             <div
               v-for="round in rounds"
               :key="round.id"
-              class="flex items-center justify-between bg-gray-700/40 rounded-lg p-4"
+              class="flex items-center justify-between bg-gray-700/40 rounded-lg p-3"
             >
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-                  <span class="text-blue-300 font-bold">{{ round.roundNumber }}</span>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                  <span class="text-blue-300 font-bold text-sm">{{ round.roundNumber }}</span>
                 </div>
                 <div>
                   <p class="text-white font-semibold text-sm">Rodada {{ round.roundNumber }}</p>
@@ -80,19 +80,19 @@
               <div>
                 <span
                   v-if="getRoundWinner(round) === 'you'"
-                  class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30"
+                  class="px-2.5 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30"
                 >
                   Ganhou
                 </span>
                 <span
                   v-else-if="getRoundWinner(round) === 'opponent'"
-                  class="px-3 py-1 bg-red-500/20 text-red-400 text-xs font-bold rounded-full border border-red-500/30"
+                  class="px-2.5 py-0.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-full border border-red-500/30"
                 >
                   Perdeu
                 </span>
                 <span
                   v-else
-                  class="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded-full border border-yellow-500/30"
+                  class="px-2.5 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded-full border border-yellow-500/30"
                 >
                   Empate
                 </span>
@@ -102,10 +102,10 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-center gap-4 pt-4">
+        <div class="flex justify-center gap-4 pt-2">
           <button
             @click="handlePlayAgain"
-            class="px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-lg font-bold rounded-xl transition transform hover:scale-105 shadow-lg"
+            class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-base font-bold rounded-xl transition transform hover:scale-105 shadow-lg"
           >
             Jogar Novamente
           </button>

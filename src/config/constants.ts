@@ -16,13 +16,15 @@ export const ROUTE_NAMES = {
   LOGIN: 'login',
   REGISTER: 'register',
   PLAY: 'play',
+  RANKING: 'ranking',
   CONFIG: 'config',
 } as const
 
 export const ROUTE_PATHS = {
-  LOGIN: '/',
+  LOGIN: '/login',
   REGISTER: '/register',
   PLAY: '/play',
+  RANKING: '/ranking',
   CONFIG: '/config',
 } as const
 
