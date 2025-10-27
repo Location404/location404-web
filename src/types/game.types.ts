@@ -2,14 +2,10 @@
  * Game Engine related types (SignalR DTOs)
  */
 
-// ============= Basic Types =============
-
 export interface Coordinate {
   x: number
   y: number
 }
-
-// ============= Request DTOs =============
 
 export interface JoinMatchmakingRequest {
   playerId: string
@@ -37,8 +33,6 @@ export interface EndRoundRequest {
   playerBGuessX: number
   playerBGuessY: number
 }
-
-// ============= Response DTOs =============
 
 export interface MatchFoundResponse {
   matchId: string
@@ -118,8 +112,6 @@ export interface GameMatch {
   currentGameRound: GameRoundDto | null
   totalRounds: number
 }
-
-// ============= Game State Types =============
 
 export enum MatchmakingStatus {
   IDLE = 'idle',

@@ -40,12 +40,10 @@ class Container {
    * Resolve a service instance
    */
   resolve<T>(identifier: ServiceIdentifier<T>): T {
-    // Check singletons first
     if (this.singletons.has(identifier)) {
       return this.singletons.get(identifier) as T
     }
 
-    // Check registered services
     const factory = this.services.get(identifier)
     if (factory) {
       return factory() as T

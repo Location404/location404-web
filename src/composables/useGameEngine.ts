@@ -22,7 +22,6 @@ export const useGameEngine = () => {
   const authStore = useAuthStore()
   const { success: toastSuccess, error: toastError } = useToast()
 
-  // Game state
   const state = ref<GameState>({
     matchmakingStatus: MatchmakingStatus.IDLE,
     gameStatus: GameStatus.WAITING,
@@ -53,7 +52,6 @@ export const useGameEngine = () => {
   const startCountdown = (seconds: number) => {
     countdownSeconds.value = seconds
 
-    // Clear any existing timer
     if (countdownTimer) {
       clearInterval(countdownTimer)
     }
@@ -84,7 +82,6 @@ export const useGameEngine = () => {
       await gameService.connect()
       isConnected.value = true
 
-      // Setup event handlers
       setupEventHandlers()
 
       toastSuccess('Conectado ao servidor de jogo!')
@@ -98,7 +95,6 @@ export const useGameEngine = () => {
    * Disconnect from SignalR hub
    */
   const disconnect = async () => {
-    // Clear countdown timer
     if (countdownTimer) {
       clearInterval(countdownTimer)
       countdownTimer = null
@@ -113,7 +109,6 @@ export const useGameEngine = () => {
    * Setup SignalR event handlers
    */
   const setupEventHandlers = () => {
-    // Match Found
     gameService.onMatchFound = (data: MatchFoundResponse) => {
       console.log('[useGameEngine] MatchFound event received:', data)
       console.log('[useGameEngine] Current player ID:', currentPlayerId.value)
@@ -142,11 +137,9 @@ export const useGameEngine = () => {
 
       toastSuccess('Partida encontrada! Iniciando...')
 
-      // Start countdown
       startCountdown(3)
     }
 
-    // Round Started
     gameService.onRoundStarted = (data: RoundStartedResponse) => {
       console.log('[useGameEngine] RoundStarted event received:', data)
       console.log('[useGameEngine] Location data:', data.location)
@@ -174,12 +167,10 @@ export const useGameEngine = () => {
       toastSuccess(`Rodada ${data.roundNumber} iniciada!`)
     }
 
-    // Guess Submitted
     gameService.onGuessSubmitted = (message: string) => {
       console.log('Palpite enviado:', message)
     }
 
-    // Round Ended
     gameService.onRoundEnded = (data: RoundEndedResponse) => {
       console.log('[useGameEngine] RoundEnded event received:', data)
 
@@ -218,7 +209,6 @@ export const useGameEngine = () => {
       toastSuccess(`Rodada finalizada! Você fez ${myPoints} pontos`)
     }
 
-    // Match Ended
     gameService.onMatchEnded = (data: MatchEndedResponse) => {
       console.log('[useGameEngine] MatchEnded event received:', data)
 
@@ -244,18 +234,15 @@ export const useGameEngine = () => {
       toastSuccess(message)
     }
 
-    // Left Queue
     gameService.onLeftQueue = (message: string) => {
       state.value.matchmakingStatus = MatchmakingStatus.IDLE
       console.log(message)
     }
 
-    // Error
     gameService.onError = (message: string) => {
       toastError(message)
     }
 
-    // Match Status
     gameService.onMatchStatus = (match: GameMatch) => {
       console.log('[useGameEngine] MatchStatus event received:', match)
 

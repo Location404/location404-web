@@ -32,7 +32,6 @@ export class GameEngineService implements IGameEngineService {
   public onError: ((message: string) => void) | null = null
 
   constructor() {
-    // Get base URL from environment
     const apiUrl = import.meta.env[ENV_KEYS.GAME_API] || 'http://localhost:5170'
     this.hubUrl = `${apiUrl}/gamehub`
   }
@@ -57,7 +56,6 @@ export class GameEngineService implements IGameEngineService {
       .configureLogging(signalR.LogLevel.Information)
       .build()
 
-    // Register server event handlers
     this.registerEventHandlers()
 
     try {
@@ -75,49 +73,41 @@ export class GameEngineService implements IGameEngineService {
   private registerEventHandlers(): void {
     if (!this.connection) return
 
-    // MatchFound event
     this.connection.on('MatchFound', (data: MatchFoundResponse) => {
       console.log('🎮 Match Found:', data)
       this.onMatchFound?.(data)
     })
 
-    // RoundStarted event
     this.connection.on('RoundStarted', (data: RoundStartedResponse) => {
       console.log('🎯 Round Started:', data)
       this.onRoundStarted?.(data)
     })
 
-    // GuessSubmitted event
     this.connection.on('GuessSubmitted', (message: string) => {
       console.log('✅ Guess Submitted:', message)
       this.onGuessSubmitted?.(message)
     })
 
-    // RoundEnded event
     this.connection.on('RoundEnded', (data: RoundEndedResponse) => {
       console.log('🏁 Round Ended:', data)
       this.onRoundEnded?.(data)
     })
 
-    // MatchEnded event
     this.connection.on('MatchEnded', (data: MatchEndedResponse) => {
       console.log('🎊 Match Ended:', data)
       this.onMatchEnded?.(data)
     })
 
-    // MatchStatus event
     this.connection.on('MatchStatus', (match: GameMatch) => {
       console.log('📊 Match Status:', match)
       this.onMatchStatus?.(match)
     })
 
-    // LeftQueue event
     this.connection.on('LeftQueue', (message: string) => {
       console.log('👋 Left Queue:', message)
       this.onLeftQueue?.(message)
     })
 
-    // Error event
     this.connection.on('Error', (message: string) => {
       console.error('❌ Game Error:', message)
       this.onError?.(message)
