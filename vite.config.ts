@@ -19,21 +19,61 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        '/useridentityapi': {
-          target: env.VITE_USER_IDENTITY_API || 'http://localhost:3000',
+        '/api/auth': {
+          target: env.VITE_AUTH_API || 'http://localhost:5185',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/useridentityapi/, '/api')
+        },
+        '/api/users': {
+          target: env.VITE_AUTH_API || 'http://localhost:5185',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/gamehub': {
+          target: env.VITE_GAME_API || 'http://localhost:5170',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+        '/api/game': {
+          target: env.VITE_GAME_API || 'http://localhost:5170',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/api/data': {
+          target: env.VITE_DATA_API || 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
         }
       }
     },
     preview: {
       proxy: {
-        '/useridentityapi': {
-          target: env.VITE_USER_IDENTITY_API || 'http://localhost:3000',
+        '/api/auth': {
+          target: env.VITE_AUTH_API || 'http://localhost:5185',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/useridentityapi/, '/api')
+        },
+        '/api/users': {
+          target: env.VITE_AUTH_API || 'http://localhost:5185',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/gamehub': {
+          target: env.VITE_GAME_API || 'http://localhost:5170',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+        '/api/game': {
+          target: env.VITE_GAME_API || 'http://localhost:5170',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/api/data': {
+          target: env.VITE_DATA_API || 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
         }
       }
     }
