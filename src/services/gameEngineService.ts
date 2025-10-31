@@ -48,7 +48,7 @@ export class GameEngineService implements IGameEngineService {
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(this.hubUrl, {
-        withCredentials: true, // Important: sends cookies with requests
+        withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
       })
