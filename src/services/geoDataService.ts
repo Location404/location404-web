@@ -85,45 +85,42 @@ class GeoDataService {
     })
   }
 
-  // Locations
   async getAllLocations(activeOnly = true): Promise<Location[]> {
-    const response = await this.axiosInstance.get<Location[]>('/api/locations', {
+    const response = await this.axiosInstance.get<Location[]>('/locations', {
       params: { activeOnly }
     })
     return response.data
   }
 
   async getLocationById(id: string): Promise<Location> {
-    const response = await this.axiosInstance.get<Location>(`/api/locations/${id}`)
+    const response = await this.axiosInstance.get<Location>(`/locations/${id}`)
     return response.data
   }
 
   async getRandomLocation(): Promise<Location> {
-    const response = await this.axiosInstance.get<Location>('/api/locations/random')
+    const response = await this.axiosInstance.get<Location>('/locations/random')
     return response.data
   }
 
-  // Player Stats
   async getPlayerStats(playerId: string): Promise<PlayerStats> {
-    const response = await this.axiosInstance.get<PlayerStats>(`/api/players/${playerId}/stats`)
+    const response = await this.axiosInstance.get<PlayerStats>(`/players/${playerId}/stats`)
     return response.data
   }
 
   async getRanking(count = 10): Promise<PlayerStats[]> {
-    const response = await this.axiosInstance.get<PlayerStats[]>('/api/players/ranking', {
+    const response = await this.axiosInstance.get<PlayerStats[]>('/players/ranking', {
       params: { count }
     })
     return response.data
   }
 
-  // Matches
   async getMatchById(matchId: string): Promise<GameMatch> {
-    const response = await this.axiosInstance.get<GameMatch>(`/api/matches/${matchId}`)
+    const response = await this.axiosInstance.get<GameMatch>(`/matches/${matchId}`)
     return response.data
   }
 
   async getPlayerMatches(playerId: string, skip = 0, take = 20): Promise<GameMatch[]> {
-    const response = await this.axiosInstance.get<GameMatch[]>(`/api/matches/player/${playerId}`, {
+    const response = await this.axiosInstance.get<GameMatch[]>(`/matches/player/${playerId}`, {
       params: { skip, take }
     })
     return response.data
