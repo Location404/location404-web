@@ -2,15 +2,13 @@ FROM node:20-alpine as builder
 
 WORKDIR /app
 
-ARG VITE_AUTH_API
-ARG VITE_GAME_API
-ARG VITE_DATA_API
+# Apenas Google Maps API Key (necessário para Street View)
 ARG VITE_GOOGLE_MAPS_API_KEY
-
-ENV VITE_AUTH_API=$VITE_AUTH_API
-ENV VITE_GAME_API=$VITE_GAME_API
-ENV VITE_DATA_API=$VITE_DATA_API
 ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+
+# VITE_AUTH_API, VITE_GAME_API, VITE_DATA_API são opcionais
+# Se não forem passados, o código usa paths relativos (/api, /gamehub)
+# e o Traefik roteia para os serviços corretos
 
 COPY package.json package-lock.json ./
 

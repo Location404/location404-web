@@ -40,8 +40,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VITE_AUTH_API=http://181.215.135.221
-            VITE_GAME_API=http://181.215.135.221
-            VITE_DATA_API=http://181.215.135.221
             VITE_GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
 
