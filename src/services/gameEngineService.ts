@@ -1,8 +1,3 @@
-/**
- * Game Engine Service
- * Handles game logic and SignalR communication
- */
-
 import * as signalR from '@microsoft/signalr'
 import type { IGameEngineService } from '@/types'
 import type {
@@ -15,13 +10,12 @@ import type {
   MatchEndedResponse,
   GameMatch,
 } from '@/types/game.types'
-import { ENV_KEYS } from '@/config/constants'
+import { runtimeConfig } from '@/config/runtime.config'
 
 export class GameEngineService implements IGameEngineService {
   private connection: signalR.HubConnection | null = null
   private readonly hubUrl: string
 
-  // Event handlers (to be set by consumers)
   public onMatchFound: ((data: MatchFoundResponse) => void) | null = null
   public onRoundStarted: ((data: RoundStartedResponse) => void) | null = null
   public onGuessSubmitted: ((message: string) => void) | null = null
@@ -32,14 +26,10 @@ export class GameEngineService implements IGameEngineService {
   public onError: ((message: string) => void) | null = null
 
   constructor() {
-    const apiUrl = import.meta.env[ENV_KEYS.GAME_API] || 'http://localhost:5170'
+    const apiUrl = runtimeConfig.gameApi || 'http://localhost:5170'
     this.hubUrl = `${apiUrl}/gamehub`
   }
 
-  /**
-   * Initialize SignalR connection
-   * Authentication is handled by cookies (managed by backend)
-   */
   async connect(): Promise<void> {
     if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
       console.log('SignalR already connected')
@@ -67,9 +57,6 @@ export class GameEngineService implements IGameEngineService {
     }
   }
 
-  /**
-   * Register all SignalR event handlers
-   */
   private registerEventHandlers(): void {
     if (!this.connection) return
 
@@ -113,7 +100,6 @@ export class GameEngineService implements IGameEngineService {
       this.onError?.(message)
     })
 
-    // Connection lifecycle events
     this.connection.onreconnecting((error) => {
       console.warn('🔄 SignalR reconnecting...', error)
     })
@@ -127,9 +113,6 @@ export class GameEngineService implements IGameEngineService {
     })
   }
 
-  /**
-   * Disconnect from SignalR hub
-   */
   async disconnect(): Promise<void> {
     if (this.connection) {
       await this.connection.stop()
@@ -138,9 +121,6 @@ export class GameEngineService implements IGameEngineService {
     }
   }
 
-  /**
-   * Join matchmaking queue
-   */
   async joinMatchmaking(request: JoinMatchmakingRequest): Promise<string> {
     if (!this.connection) {
       throw new Error('Not connected to game server')
@@ -149,9 +129,6 @@ export class GameEngineService implements IGameEngineService {
     return await this.connection.invoke<string>('JoinMatchmaking', request)
   }
 
-  /**
-   * Leave matchmaking queue
-   */
   async leaveMatchmaking(playerId: string): Promise<void> {
     if (!this.connection) {
       throw new Error('Not connected to game server')
@@ -160,9 +137,6 @@ export class GameEngineService implements IGameEngineService {
     await this.connection.invoke('LeaveMatchmaking', playerId)
   }
 
-  /**
-   * Start a new round
-   */
   async startRound(request: StartRoundRequest): Promise<void> {
     if (!this.connection) {
       throw new Error('Not connected to game server')
@@ -171,9 +145,6 @@ export class GameEngineService implements IGameEngineService {
     await this.connection.invoke('StartRound', request)
   }
 
-  /**
-   * Submit a guess for the current round
-   */
   async submitGuess(request: SubmitGuessRequest): Promise<void> {
     if (!this.connection) {
       throw new Error('Not connected to game server')
@@ -182,9 +153,6 @@ export class GameEngineService implements IGameEngineService {
     await this.connection.invoke('SubmitGuess', request)
   }
 
-  /**
-   * Get current match status
-   */
   async getMatchStatus(matchId: string): Promise<void> {
     if (!this.connection) {
       throw new Error('Not connected to game server')
@@ -193,16 +161,10 @@ export class GameEngineService implements IGameEngineService {
     await this.connection.invoke('GetMatchStatus', matchId)
   }
 
-  /**
-   * Check if connected
-   */
   isConnected(): boolean {
     return this.connection?.state === signalR.HubConnectionState.Connected
   }
 
-  /**
-   * Get connection state
-   */
   getConnectionState(): signalR.HubConnectionState | null {
     return this.connection?.state || null
   }

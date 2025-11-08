@@ -1,8 +1,8 @@
 import axios from 'axios'
 import type { AxiosInstance } from 'axios'
-import { ENV_KEYS } from '@/config/constants'
+import { runtimeConfig } from '@/config/runtime.config'
 
-const API_BASE_URL = import.meta.env[ENV_KEYS.DATA_API] || 'http://localhost:5000'
+const API_BASE_URL = runtimeConfig.dataApi || 'http://localhost:5000'
 
 export interface Coordinate {
   x: number
