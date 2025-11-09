@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { API_CONSTANTS } from './constants'
 import { runtimeConfig } from './runtime.config'
 
@@ -34,6 +34,28 @@ export const getBaseURL = (service: ApiService): string => {
   return apiUrl + config.basePath
 }
 
+interface RetryConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
+
+let isRefreshing = false
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void
+  reject: (reason?: unknown) => void
+}> = []
+
+const processQueue = (error: Error | null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve()
+    }
+  })
+
+  failedQueue = []
+}
+
 export const createApiClient = (service: ApiService): AxiosInstance => {
   const client = axios.create({
     baseURL: getBaseURL(service),
@@ -55,13 +77,61 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
     (response) => {
       return response
     },
-    (error) => {
+    async (error) => {
+      const originalRequest = error.config as RetryConfig
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject })
+          })
+            .then(() => {
+              return client.request(originalRequest)
+            })
+            .catch((err) => {
+              return Promise.reject(err)
+            })
+        }
+
+        originalRequest._retry = true
+        isRefreshing = true
+
+        try {
+          await axios.post(
+            `${getBaseURL(ApiService.AUTH)}/auth/refresh`,
+            {},
+            { withCredentials: true }
+          )
+
+          console.log('✅ Token refreshed successfully')
+          processQueue(null)
+          isRefreshing = false
+
+          return client.request(originalRequest)
+        } catch (refreshError) {
+          console.error('❌ Refresh token failed, redirecting to login')
+          processQueue(refreshError as Error)
+          isRefreshing = false
+
+          const { useAuthStore } = await import('@/stores/auth')
+          const authStore = useAuthStore()
+          authStore.logout()
+
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login'
+          }
+
+          return Promise.reject(refreshError)
+        }
+      }
+
       console.error(
         `[${service}] API Error:`,
         error.response?.status,
         error.config?.url,
         error.message
       )
+
       return Promise.reject(error)
     }
   )
