@@ -77,7 +77,7 @@
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap">
                           <div class="text-sm font-medium text-white">
-                            {{ player.playerId.substring(0, 8) }}...
+                            {{ player.playerId?.substring(0, 8) || 'N/A' }}...
                           </div>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap">
@@ -94,10 +94,10 @@
                           </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-white/80">
-                          {{ player.winRate.toFixed(1) }}%
+                          {{ player.winRate?.toFixed(1) || '0.0' }}%
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-white/80">
-                          {{ Math.round(player.averagePointsPerRound) }} pts
+                          {{ Math.round(player.averagePointsPerRound || 0) }} pts
                         </td>
                       </tr>
                     </tbody>

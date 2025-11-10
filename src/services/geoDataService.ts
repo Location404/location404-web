@@ -25,17 +25,17 @@ export interface Location {
 }
 
 export interface PlayerStats {
-  playerId: string
+  playerId?: string
   totalMatches: number
   wins: number
   losses: number
   draws: number
-  winRate: number
+  winRate?: number
   totalRoundsPlayed: number
   totalPoints: number
   highestScore: number
-  averagePointsPerRound: number
-  averageDistanceErrorKm: number
+  averagePointsPerRound?: number
+  averageDistanceErrorKm?: number
   rankingPoints: number
   lastMatchAt: string | null
 }
