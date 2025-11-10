@@ -141,6 +141,7 @@ const loadRanking = async () => {
 
   try {
     ranking.value = await geoDataService.getRanking(100)
+    console.log('Ranking data received:', ranking.value)
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Erro ao carregar ranking'
     console.error('Error loading ranking:', err)
