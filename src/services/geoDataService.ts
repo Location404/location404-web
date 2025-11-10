@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { AxiosInstance } from 'axios'
 import { runtimeConfig } from '@/config/runtime.config'
 
-const API_BASE_URL = runtimeConfig.dataApi || 'http://localhost:5000'
+const API_BASE_URL = runtimeConfig.dataApi ? `${runtimeConfig.dataApi}/api` : 'http://localhost:5000/api'
 
 export interface Coordinate {
   x: number
