@@ -25,7 +25,7 @@
           </div>
           <div class="bg-white rounded-lg shadow p-6">
             <div class="text-gray-500 text-sm">Win Rate</div>
-            <div class="text-3xl font-bold text-green-600">{{ stats.winRate.toFixed(1) }}%</div>
+            <div class="text-3xl font-bold text-green-600">{{ stats.winRate?.toFixed(1) || '0.0' }}%</div>
           </div>
           <div class="bg-white rounded-lg shadow p-6">
             <div class="text-gray-500 text-sm">Maior Pontuação</div>
@@ -59,11 +59,11 @@
             </div>
             <div>
               <div class="text-gray-500 text-sm">Média por Rodada</div>
-              <div class="text-2xl font-bold">{{ Math.round(stats.averagePointsPerRound) }}</div>
+              <div class="text-2xl font-bold">{{ Math.round(stats.averagePointsPerRound || 0) }}</div>
             </div>
             <div class="col-span-2">
               <div class="text-gray-500 text-sm">Erro Médio de Distância</div>
-              <div class="text-2xl font-bold">{{ Math.round(stats.averageDistanceErrorKm) }} km</div>
+              <div class="text-2xl font-bold">{{ Math.round(stats.averageDistanceErrorKm || 0) }} km</div>
             </div>
             <div>
               <div class="text-gray-500 text-sm">Última Partida</div>
