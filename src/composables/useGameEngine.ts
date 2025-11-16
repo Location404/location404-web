@@ -212,7 +212,10 @@ export const useGameEngine = () => {
 
     gameService.onOpponentSubmitted = (data: { playerId: string; opponentId: string }) => {
       console.log('[useGameEngine] OpponentSubmitted event received:', data)
-      opponentSubmitted.value = true
+
+      if (data.playerId !== currentPlayerId.value) {
+        opponentSubmitted.value = true
+      }
     }
 
     gameService.onTimerAdjusted = (data: { matchId: string; roundId: string; newDuration: number; adjustedAt: string }) => {
@@ -234,7 +237,6 @@ export const useGameEngine = () => {
 
       state.value.gameStatus = GameStatus.ROUND_ENDED
 
-      // Create a temporary round object to store the final results for display
       const finalRoundData = state.value.currentRound
         ? {
             ...state.value.currentRound,
@@ -245,12 +247,21 @@ export const useGameEngine = () => {
             playerBPoints: data.playerBPoints,
             gameRoundEnded: true,
           }
-        : null
+        : {
+            id: data.roundId,
+            gameMatchId: data.matchId,
+            roundNumber: data.roundNumber,
+            playerAId: state.value.currentMatch?.playerAId || '',
+            playerBId: state.value.currentMatch?.playerBId || '',
+            playerAPoints: data.playerAPoints,
+            playerBPoints: data.playerBPoints,
+            gameResponse: data.correctAnswer,
+            playerAGuess: data.playerAGuess,
+            playerBGuess: data.playerBGuess,
+            gameRoundEnded: true,
+          }
 
-      // Store the final round data for display
-      if (finalRoundData) {
-        state.value.currentRound = finalRoundData
-      }
+      state.value.currentRound = finalRoundData
 
       // Update match totals
       if (state.value.currentMatch) {
