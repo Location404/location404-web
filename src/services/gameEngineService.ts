@@ -19,6 +19,8 @@ export class GameEngineService implements IGameEngineService {
   public onMatchFound: ((data: MatchFoundResponse) => void) | null = null
   public onRoundStarted: ((data: RoundStartedResponse) => void) | null = null
   public onGuessSubmitted: ((message: string) => void) | null = null
+  public onOpponentSubmitted: ((data: { playerId: string; opponentId: string }) => void) | null = null
+  public onTimerAdjusted: ((data: { matchId: string; roundId: string; newDuration: number; adjustedAt: string }) => void) | null = null
   public onRoundEnded: ((data: RoundEndedResponse) => void) | null = null
   public onMatchEnded: ((data: MatchEndedResponse) => void) | null = null
   public onMatchStatus: ((match: GameMatch) => void) | null = null
@@ -73,6 +75,16 @@ export class GameEngineService implements IGameEngineService {
     this.connection.on('GuessSubmitted', (message: string) => {
       console.log('✅ Guess Submitted:', message)
       this.onGuessSubmitted?.(message)
+    })
+
+    this.connection.on('OpponentSubmitted', (data: { playerId: string; opponentId: string }) => {
+      console.log('👤 Opponent Submitted:', data)
+      this.onOpponentSubmitted?.(data)
+    })
+
+    this.connection.on('TimerAdjusted', (data: { matchId: string; roundId: string; newDuration: number; adjustedAt: string }) => {
+      console.log('⏱️ Timer Adjusted:', data)
+      this.onTimerAdjusted?.(data)
     })
 
     this.connection.on('RoundEnded', (data: RoundEndedResponse) => {

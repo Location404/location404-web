@@ -31,7 +31,10 @@
                 {{ myPoints }} pts
               </div>
             </div>
-            <div class="space-y-1 text-xs">
+            <div v-if="myGuess === null" class="text-red-400 text-center text-xs">
+              ⏱️ Tempo esgotado! Sem palpite.
+            </div>
+            <div v-else class="space-y-1 text-xs">
               <div class="flex justify-between text-white/80">
                 <span>Distância:</span>
                 <span class="font-semibold text-white">{{ myDistance.toFixed(2) }} km</span>
@@ -53,7 +56,10 @@
                 {{ opponentPoints }} pts
               </div>
             </div>
-            <div class="space-y-1 text-xs">
+            <div v-if="opponentGuess === null" class="text-red-400 text-center text-xs">
+              ⏱️ Tempo esgotado! Sem palpite.
+            </div>
+            <div v-else class="space-y-1 text-xs">
               <div class="flex justify-between text-white/80">
                 <span>Distância:</span>
                 <span class="font-semibold text-white">{{ opponentDistance.toFixed(2) }} km</span>
@@ -118,8 +124,8 @@ const props = defineProps<{
   apiKey: string
   roundNumber: number
   correctAnswer: Coordinate
-  playerAGuess: Coordinate
-  playerBGuess: Coordinate
+  playerAGuess: Coordinate | null
+  playerBGuess: Coordinate | null
   playerAPoints: number | null
   playerBPoints: number | null
   playerATotalPoints: number | null
@@ -157,8 +163,8 @@ const opponentPoints = computed(() => props.isPlayerA ? props.playerBPoints : pr
 const myTotalPoints = computed(() => props.isPlayerA ? props.playerATotalPoints : props.playerBTotalPoints)
 const opponentTotalPoints = computed(() => props.isPlayerA ? props.playerBTotalPoints : props.playerATotalPoints)
 
-const myDistance = computed(() => calculateDistance(myGuess.value, props.correctAnswer))
-const opponentDistance = computed(() => calculateDistance(opponentGuess.value, props.correctAnswer))
+const myDistance = computed(() => myGuess.value ? calculateDistance(myGuess.value, props.correctAnswer) : 0)
+const opponentDistance = computed(() => opponentGuess.value ? calculateDistance(opponentGuess.value, props.correctAnswer) : 0)
 
 const handleContinue = () => {
   emit('continue')

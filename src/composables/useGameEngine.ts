@@ -35,7 +35,13 @@ export const useGameEngine = () => {
 
   const isConnected = ref(false)
   const countdownSeconds = ref(0)
+  const roundTimer = ref(90)
+  const youSubmitted = ref(false)
+  const opponentSubmitted = ref(false)
   let countdownTimer: number | null = null
+  let roundTimerInterval: number | null = null
+  let timerStartedAt: Date | null = null
+  let timerDuration: number = 90
 
   const isSearching = computed(() => state.value.matchmakingStatus === MatchmakingStatus.SEARCHING)
   const inMatch = computed(() =>
@@ -98,6 +104,11 @@ export const useGameEngine = () => {
     if (countdownTimer) {
       clearInterval(countdownTimer)
       countdownTimer = null
+    }
+
+    if (roundTimerInterval) {
+      clearInterval(roundTimerInterval)
+      roundTimerInterval = null
     }
 
     await gameService.disconnect()
@@ -163,16 +174,63 @@ export const useGameEngine = () => {
       state.value.myGuess = null
       state.value.opponentGuess = null
 
+      youSubmitted.value = false
+      opponentSubmitted.value = false
+
+      timerStartedAt = new Date(data.startedAt)
+      timerDuration = data.durationSeconds
+      roundTimer.value = timerDuration
+
+      if (roundTimerInterval) clearInterval(roundTimerInterval)
+
+      roundTimerInterval = window.setInterval(() => {
+        if (!timerStartedAt) return
+
+        const now = new Date()
+        const elapsed = Math.floor((now.getTime() - timerStartedAt.getTime()) / 1000)
+        const remaining = Math.max(0, timerDuration - elapsed)
+
+        roundTimer.value = remaining
+
+        if (remaining <= 0) {
+          if (roundTimerInterval) {
+            clearInterval(roundTimerInterval)
+            roundTimerInterval = null
+          }
+        }
+      }, 100)
+
       console.log('[useGameEngine] State updated - currentLocation:', state.value.currentLocation)
+      console.log('[useGameEngine] Timer started at:', timerStartedAt, 'Duration:', timerDuration)
       toastSuccess(`Rodada ${data.roundNumber} iniciada!`)
     }
 
     gameService.onGuessSubmitted = (message: string) => {
-      console.log('Palpite enviado:', message)
+      console.log('[useGameEngine] GuessSubmitted event received:', message)
+      youSubmitted.value = true
+    }
+
+    gameService.onOpponentSubmitted = (data: { playerId: string; opponentId: string }) => {
+      console.log('[useGameEngine] OpponentSubmitted event received:', data)
+      opponentSubmitted.value = true
+    }
+
+    gameService.onTimerAdjusted = (data: { matchId: string; roundId: string; newDuration: number; adjustedAt: string }) => {
+      console.log('[useGameEngine] TimerAdjusted event received:', data)
+
+      timerStartedAt = new Date(data.adjustedAt)
+      timerDuration = data.newDuration
+
+      console.log('[useGameEngine] Timer adjusted to:', timerDuration, 'seconds at:', timerStartedAt)
     }
 
     gameService.onRoundEnded = (data: RoundEndedResponse) => {
       console.log('[useGameEngine] RoundEnded event received:', data)
+
+      if (roundTimerInterval) {
+        clearInterval(roundTimerInterval)
+        roundTimerInterval = null
+      }
 
       state.value.gameStatus = GameStatus.ROUND_ENDED
 
@@ -407,6 +465,9 @@ export const useGameEngine = () => {
     isPlayerA,
     isMatchFound,
     countdownSeconds,
+    roundTimer,
+    youSubmitted,
+    opponentSubmitted,
 
     // Actions
     connect,

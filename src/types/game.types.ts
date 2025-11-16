@@ -54,6 +54,8 @@ export interface RoundStartedResponse {
   roundNumber: number
   startTime: string
   location: LocationData
+  startedAt: string
+  durationSeconds: number
 }
 
 export interface RoundEndedResponse {

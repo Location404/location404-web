@@ -113,10 +113,10 @@
       <div v-if="inMatch" class="absolute inset-0 pointer-events-none">
         <!-- Top Bar: Match Info -->
         <div class="absolute top-0 left-0 right-0 bg-black/60 backdrop-blur-md border-b border-white/10 p-3 pointer-events-auto z-40">
-          <div class="flex justify-between items-center">
+          <div class="relative flex justify-between items-center">
             <!-- Score Info -->
             <div class="flex items-center gap-4">
-              <div class="bg-white/10 rounded-lg px-3 py-1.5">
+              <div class="bg-white/10 rounded-lg px-3 py-1.5 relative">
                 <p class="text-xs text-white/60">Você</p>
                 <p class="text-lg font-bold text-white">
                   {{
@@ -126,9 +126,13 @@
                   }}
                   pts
                 </p>
+                <div v-if="state.gameStatus === 'round_active'" class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs" :class="youSubmitted ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'">
+                  <span v-if="youSubmitted">✓</span>
+                  <span v-else>⏱️</span>
+                </div>
               </div>
               <span class="text-white/80 text-sm font-bold">VS</span>
-              <div class="bg-white/10 rounded-lg px-3 py-1.5">
+              <div class="bg-white/10 rounded-lg px-3 py-1.5 relative">
                 <p class="text-xs text-white/60">Oponente</p>
                 <p class="text-lg font-bold text-white">
                   {{
@@ -138,7 +142,24 @@
                   }}
                   pts
                 </p>
+                <div v-if="state.gameStatus === 'round_active'" class="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs" :class="opponentSubmitted ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'">
+                  <span v-if="opponentSubmitted">✓</span>
+                  <span v-else>⏱️</span>
+                </div>
               </div>
+            </div>
+
+            <!-- Timer (centralizado absoluto) -->
+            <div
+              class="absolute left-1/2 -translate-x-1/2 rounded-lg px-4 py-1.5 transition-colors"
+              :class="roundTimer <= 10 ? 'bg-red-500/30' : 'bg-white/10'"
+            >
+              <p
+                class="text-2xl font-bold text-white"
+                :class="{ 'animate-pulse': roundTimer <= 10 }"
+              >
+                {{ formatTimer(roundTimer) }}
+              </p>
             </div>
 
             <!-- Round Info -->
@@ -168,12 +189,19 @@
         >
           <div class="flex justify-center">
             <button
-              v-if="state.myGuess && state.gameStatus === 'round_active'"
+              v-if="state.myGuess && state.gameStatus === 'round_active' && !youSubmitted"
               @click="handleConfirmGuess"
               class="px-8 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition transform hover:scale-105 shadow-lg"
             >
               Confirmar Palpite
             </button>
+            <div v-else-if="youSubmitted && !opponentSubmitted && state.gameStatus === 'round_active'" class="text-white text-sm flex items-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Aguardando oponente...
+            </div>
             <div v-else-if="state.gameStatus === 'round_active'" class="text-white/60 text-xs">
               Clique no mini-mapa para fazer seu palpite
             </div>
@@ -222,7 +250,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useGameEngine } from '@/composables'
 import { useAuthStore } from '@/stores/auth'
 import { GameStatus } from '@/types'
@@ -243,6 +271,9 @@ const {
   isPlayerA,
   isMatchFound,
   countdownSeconds,
+  roundTimer,
+  youSubmitted,
+  opponentSubmitted,
   connect,
   joinMatchmaking,
   leaveMatchmaking,
@@ -250,6 +281,13 @@ const {
   submitGuess,
   resetState,
 } = useGameEngine()
+
+// Formatar timer (0:30, 0:15, 0:05, etc)
+const formatTimer = (seconds: number) => {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
 
 onMounted(async () => {
   await connect()

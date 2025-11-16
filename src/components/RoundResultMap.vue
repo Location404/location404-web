@@ -12,8 +12,8 @@ import type { Coordinate } from '@/types'
 const props = defineProps<{
   apiKey: string
   correctAnswer: Coordinate
-  playerAGuess: Coordinate
-  playerBGuess: Coordinate
+  playerAGuess: Coordinate | null
+  playerBGuess: Coordinate | null
   isPlayerA: boolean
 }>()
 
@@ -67,78 +67,86 @@ const initMap = async () => {
       title: 'Localização Correta',
     })
 
-    // Create player A marker (blue)
-    playerAMarker = new google.maps.Marker({
-      position: { lat: props.playerAGuess.x, lng: props.playerAGuess.y },
-      map: map,
-      label: {
-        text: props.isPlayerA ? 'V' : 'O',
-        color: 'white',
-        fontSize: '14px',
-        fontWeight: 'bold',
-      },
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 12,
-        fillColor: '#3B82F6',
-        fillOpacity: 1,
-        strokeColor: '#FFFFFF',
+    if (props.playerAGuess) {
+      playerAMarker = new google.maps.Marker({
+        position: { lat: props.playerAGuess.x, lng: props.playerAGuess.y },
+        map: map,
+        label: {
+          text: props.isPlayerA ? 'V' : 'O',
+          color: 'white',
+          fontSize: '14px',
+          fontWeight: 'bold',
+        },
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 12,
+          fillColor: '#3B82F6',
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 2,
+        },
+        title: props.isPlayerA ? 'Seu Palpite' : 'Palpite do Oponente',
+      })
+    }
+
+    if (props.playerBGuess) {
+      playerBMarker = new google.maps.Marker({
+        position: { lat: props.playerBGuess.x, lng: props.playerBGuess.y },
+        map: map,
+        label: {
+          text: props.isPlayerA ? 'O' : 'V',
+          color: 'white',
+          fontSize: '14px',
+          fontWeight: 'bold',
+        },
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 12,
+          fillColor: '#EF4444',
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 2,
+        },
+        title: props.isPlayerA ? 'Palpite do Oponente' : 'Seu Palpite',
+      })
+    }
+
+    if (props.playerAGuess) {
+      polylineA = new google.maps.Polyline({
+        path: [
+          { lat: props.playerAGuess.x, lng: props.playerAGuess.y },
+          { lat: props.correctAnswer.x, lng: props.correctAnswer.y },
+        ],
+        geodesic: true,
+        strokeColor: '#3B82F6',
+        strokeOpacity: 0.6,
         strokeWeight: 2,
-      },
-      title: props.isPlayerA ? 'Seu Palpite' : 'Palpite do Oponente',
-    })
+        map: map,
+      })
+    }
 
-    // Create player B marker (red)
-    playerBMarker = new google.maps.Marker({
-      position: { lat: props.playerBGuess.x, lng: props.playerBGuess.y },
-      map: map,
-      label: {
-        text: props.isPlayerA ? 'O' : 'V',
-        color: 'white',
-        fontSize: '14px',
-        fontWeight: 'bold',
-      },
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 12,
-        fillColor: '#EF4444',
-        fillOpacity: 1,
-        strokeColor: '#FFFFFF',
+    if (props.playerBGuess) {
+      polylineB = new google.maps.Polyline({
+        path: [
+          { lat: props.playerBGuess.x, lng: props.playerBGuess.y },
+          { lat: props.correctAnswer.x, lng: props.correctAnswer.y },
+        ],
+        geodesic: true,
+        strokeColor: '#EF4444',
+        strokeOpacity: 0.6,
         strokeWeight: 2,
-      },
-      title: props.isPlayerA ? 'Palpite do Oponente' : 'Seu Palpite',
-    })
+        map: map,
+      })
+    }
 
-    // Draw lines from guesses to correct answer
-    polylineA = new google.maps.Polyline({
-      path: [
-        { lat: props.playerAGuess.x, lng: props.playerAGuess.y },
-        { lat: props.correctAnswer.x, lng: props.correctAnswer.y },
-      ],
-      geodesic: true,
-      strokeColor: '#3B82F6',
-      strokeOpacity: 0.6,
-      strokeWeight: 2,
-      map: map,
-    })
-
-    polylineB = new google.maps.Polyline({
-      path: [
-        { lat: props.playerBGuess.x, lng: props.playerBGuess.y },
-        { lat: props.correctAnswer.x, lng: props.correctAnswer.y },
-      ],
-      geodesic: true,
-      strokeColor: '#EF4444',
-      strokeOpacity: 0.6,
-      strokeWeight: 2,
-      map: map,
-    })
-
-    // Fit map to show all markers
     const bounds = new google.maps.LatLngBounds()
     bounds.extend({ lat: props.correctAnswer.x, lng: props.correctAnswer.y })
-    bounds.extend({ lat: props.playerAGuess.x, lng: props.playerAGuess.y })
-    bounds.extend({ lat: props.playerBGuess.x, lng: props.playerBGuess.y })
+    if (props.playerAGuess) {
+      bounds.extend({ lat: props.playerAGuess.x, lng: props.playerAGuess.y })
+    }
+    if (props.playerBGuess) {
+      bounds.extend({ lat: props.playerBGuess.x, lng: props.playerBGuess.y })
+    }
     map.fitBounds(bounds)
 
     // Add some padding
