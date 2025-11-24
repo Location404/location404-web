@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
       environment: 'happy-dom',
       coverage: {
         provider: 'v8',
-        reporter: ['text', 'json', 'html'],
+        reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
         include: ['src/**/*.{ts,vue}'],
         exclude: [
           'node_modules/',
