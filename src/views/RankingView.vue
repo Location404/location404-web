@@ -13,7 +13,7 @@
           ></div>
 
           <div class="relative z-10 flex flex-col gap-6 h-full">
-            <h1 class="text-3xl font-bold text-white text-center">🏆 Ranking Global</h1>
+            <h1 class="text-3xl font-bold text-white text-center">Ranking Global</h1>
 
             <div v-if="loading" class="flex-1 flex items-center justify-center">
               <div class="flex flex-col items-center gap-4">
@@ -39,7 +39,7 @@
                           Jogador
                         </th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          Pontos ELO
+                          Pontos
                         </th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                           Partidas
@@ -70,14 +70,25 @@
                         <td class="px-4 py-3 whitespace-nowrap">
                           <span class="text-lg font-bold text-white">
                             {{ index + 1 }}
-                            <span v-if="index === 0">🥇</span>
-                            <span v-else-if="index === 1">🥈</span>
-                            <span v-else-if="index === 2">🥉</span>
                           </span>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap">
-                          <div class="text-sm font-medium text-white">
-                            {{ player.playerId?.substring(0, 8) || 'N/A' }}...
+                          <div class="flex items-center gap-3">
+                            <img
+                              v-if="player.profileImage"
+                              :src="`data:image/jpeg;base64,${player.profileImage}`"
+                              alt="Profile"
+                              class="w-8 h-8 rounded-full object-cover border-2 border-white/30"
+                            />
+                            <div
+                              v-else
+                              class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30"
+                            >
+                              <span class="text-white text-xs font-bold">{{ player.username?.charAt(0).toUpperCase() || '?' }}</span>
+                            </div>
+                            <div class="text-sm font-medium text-white">
+                              {{ player.username || 'Desconhecido' }}
+                            </div>
                           </div>
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap">
@@ -129,18 +140,45 @@
 import { ref, onMounted } from 'vue'
 import Toolbar from '@/components/ToolbarForm.vue'
 import geoDataService, { type PlayerStats } from '@/services/geoDataService'
+import { UserIdentityService } from '@/services/userIdentityService'
 import background from '@/assets/bg.png'
 
-const ranking = ref<PlayerStats[]>([])
+interface PlayerWithProfile extends PlayerStats {
+  username?: string
+  profileImage?: string
+}
+
+const ranking = ref<PlayerWithProfile[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+const userIdentityService = new UserIdentityService()
 
 const loadRanking = async () => {
   loading.value = true
   error.value = null
 
   try {
-    ranking.value = await geoDataService.getRanking(100)
+    const rankingData = await geoDataService.getRanking(100)
+
+    // Buscar usernames e profile images
+    const playerIds = rankingData.map(p => p.playerId).filter(Boolean) as string[]
+
+    if (playerIds.length > 0) {
+      const profiles = await userIdentityService.getUsersProfiles(playerIds)
+
+      // Mapear perfis para o ranking
+      ranking.value = rankingData.map(player => {
+        const profile = profiles.find(p => p.id === player.playerId)
+        return {
+          ...player,
+          username: profile?.username,
+          profileImage: profile?.profileImage
+        }
+      })
+    } else {
+      ranking.value = rankingData
+    }
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Erro ao carregar ranking'
     console.error('Error loading ranking:', err)

@@ -59,6 +59,16 @@ export class UserIdentityService implements IUserIdentityService {
   }
 
   /**
+   * Get multiple users profiles (batch)
+   */
+  async getUsersProfiles(userIds: string[]): Promise<Array<{ id: string; username: string; profileImage: string }>> {
+    const response = await this.client.post<Array<{ id: string; username: string; profileImage: string }>>('users/profiles', {
+      userIds
+    })
+    return response.data
+  }
+
+  /**
    * Update user profile
    */
   async updateUserProfile(data: UpdateUserProfileRequest): Promise<UserProfile> {
