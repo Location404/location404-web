@@ -80,7 +80,12 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
     async (error) => {
       const originalRequest = error.config as RetryConfig
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      const authEndpoints = ['/auth/login', '/auth/register', '/auth/refresh']
+      const isAuthEndpoint = authEndpoints.some((endpoint) =>
+        originalRequest.url?.includes(endpoint)
+      )
+
+      if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
         if (isRefreshing) {
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject })
@@ -109,7 +114,7 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
 
           return client.request(originalRequest)
         } catch (refreshError) {
-          console.error('❌ Refresh token failed, redirecting to login')
+          console.error('❌ Refresh token failed:', refreshError)
           processQueue(refreshError as Error)
           isRefreshing = false
 
@@ -117,7 +122,8 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
           const authStore = useAuthStore()
           authStore.logout()
 
-          if (typeof window !== 'undefined') {
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            console.log('Redirecting to /login')
             window.location.href = '/login'
           }
 
