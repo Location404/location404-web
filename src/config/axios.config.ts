@@ -108,7 +108,6 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
             { withCredentials: true }
           )
 
-          console.log('✅ Token refreshed successfully')
           processQueue(null)
           isRefreshing = false
 
@@ -123,7 +122,6 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
           authStore.logout()
 
           if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-            console.log('Redirecting to /login')
             window.location.href = '/login'
           }
 
