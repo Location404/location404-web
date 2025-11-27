@@ -309,10 +309,13 @@ const handleConfirmGuess = async () => {
 
 const handleContinueFromResult = async () => {
   if (state.value.currentMatch?.gameRounds && state.value.currentMatch.gameRounds.length < 3) {
-    // Start next round
     await startRound()
+  } else {
+    if (state.value.gameStatus !== GameStatus.MATCH_ENDED) {
+      console.log('[PlayForm] Forcing state transition to MATCH_ENDED (3 rounds completed)')
+      state.value.gameStatus = GameStatus.MATCH_ENDED
+    }
   }
-  // If match ended, the handler will take care of showing match end screen
 }
 
 const handlePlayAgain = async () => {

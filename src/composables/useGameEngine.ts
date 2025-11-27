@@ -43,6 +43,9 @@ export const useGameEngine = () => {
   let timerStartedAt: Date | null = null
   let timerDuration: number = 90
 
+  const processedRoundIds = new Set<string>()
+  const processedMatchIds = new Set<string>()
+
   const isSearching = computed(() => state.value.matchmakingStatus === MatchmakingStatus.SEARCHING)
   const inMatch = computed(() =>
     state.value.currentMatch !== null &&
@@ -124,6 +127,9 @@ export const useGameEngine = () => {
       console.log('[useGameEngine] MatchFound event received:', data)
       console.log('[useGameEngine] Current player ID:', currentPlayerId.value)
       console.log('[useGameEngine] Current matchmaking status:', state.value.matchmakingStatus)
+
+      processedRoundIds.clear()
+      processedMatchIds.clear()
 
       state.value.matchmakingStatus = MatchmakingStatus.MATCH_FOUND
       state.value.currentMatch = {
@@ -227,6 +233,13 @@ export const useGameEngine = () => {
     gameService.onRoundEnded = (data: RoundEndedResponse) => {
       console.log('[useGameEngine] RoundEnded event received:', data)
 
+      const roundKey = `${data.matchId}:${data.roundId}`
+      if (processedRoundIds.has(roundKey)) {
+        console.log('[useGameEngine] Ignoring duplicate RoundEnded event for round:', roundKey)
+        return
+      }
+      processedRoundIds.add(roundKey)
+
       if (roundTimerInterval) {
         clearInterval(roundTimerInterval)
         roundTimerInterval = null
@@ -277,6 +290,13 @@ export const useGameEngine = () => {
 
     gameService.onMatchEnded = (data: MatchEndedResponse) => {
       console.log('[useGameEngine] MatchEnded event received:', data)
+
+      const matchKey = data.matchId
+      if (processedMatchIds.has(matchKey)) {
+        console.log('[useGameEngine] Ignoring duplicate MatchEnded event for match:', matchKey)
+        return
+      }
+      processedMatchIds.add(matchKey)
 
       state.value.gameStatus = GameStatus.MATCH_ENDED
 
@@ -457,6 +477,12 @@ export const useGameEngine = () => {
       opponentGuess: null,
       isMyTurn: false,
     }
+
+    processedRoundIds.clear()
+    processedMatchIds.clear()
+
+    youSubmitted.value = false
+    opponentSubmitted.value = false
   }
 
   // Cleanup on unmount
