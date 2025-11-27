@@ -95,6 +95,31 @@
               placeholder="•••••••••••••"
               class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
             />
+            <div v-if="password" class="mt-2">
+              <div class="flex space-x-1">
+                <div
+                  :class="[
+                    'h-1 w-full rounded',
+                    passwordStrength.score >= 1 ? passwordStrength.color : 'bg-white/20',
+                  ]"
+                ></div>
+                <div
+                  :class="[
+                    'h-1 w-full rounded',
+                    passwordStrength.score >= 2 ? passwordStrength.color : 'bg-white/20',
+                  ]"
+                ></div>
+                <div
+                  :class="[
+                    'h-1 w-full rounded',
+                    passwordStrength.score >= 3 ? passwordStrength.color : 'bg-white/20',
+                  ]"
+                ></div>
+              </div>
+              <p class="text-xs text-white/70 mt-1">
+                {{ passwordStrength.label }}
+              </p>
+            </div>
           </label>
           <label class="flex-1 flex flex-col gap-1">
             <span>Confirmar Senha:</span>
@@ -105,13 +130,19 @@
               placeholder="•••••••••••••"
               class="w-full px-3 py-2 rounded-lg bg-white/20 border border-white/30 focus:outline-none"
             />
+            <p
+              v-if="confirmPassword && password && !passwordsMatch(password, confirmPassword)"
+              class="text-red-300 text-xs mt-1"
+            >
+              As senhas não coincidem
+            </p>
           </label>
         </div>
 
         <div class="flex justify-end mt-4">
           <button
             type="submit"
-            :disabled="loading"
+            :disabled="loading || !isFormValid"
             class="py-2 px-6 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ loading ? 'Salvando...' : 'Salvar' }}
@@ -123,10 +154,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUserIdentityService, useToast } from '@/composables'
+import { useUserIdentityService, useToast, useFormValidation } from '@/composables'
 import { ROUTE_NAMES } from '@/config/constants'
 import { base64ToDataUrl, createImagePreview } from '@/utils/image-utils'
 import type { UserProfile } from '@/types'
@@ -136,6 +167,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const userIdentityService = useUserIdentityService()
 const { success: toastSuccess, error: toastError } = useToast()
+const { calculatePasswordStrength, passwordsMatch } = useFormValidation()
 
 const userProfile = ref<UserProfile | null>(null)
 const originalUserProfile = ref<UserProfile | null>(null)
@@ -144,6 +176,24 @@ const confirmPassword = ref('')
 const selectedFile = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
 const loading = ref(false)
+
+const passwordStrength = computed(() => calculatePasswordStrength(password.value))
+
+const isFormValid = computed(() => {
+  if (!userProfile.value) return false
+
+  if (!userProfile.value.username?.trim()) return false
+
+  if (!userProfile.value.email?.trim()) return false
+
+  if (password.value) {
+    if (passwordStrength.value.score < 2) return false
+
+    if (!passwordsMatch(password.value, confirmPassword.value)) return false
+  }
+
+  return true
+})
 
 function handleLogout() {
   authStore.logout()
@@ -187,7 +237,12 @@ async function saveProfile() {
     return
   }
 
-  if (password.value && password.value !== confirmPassword.value) {
+  if (!isFormValid.value) {
+    toastError('Preencha todos os campos corretamente!')
+    return
+  }
+
+  if (password.value && !passwordsMatch(password.value, confirmPassword.value)) {
     toastError('As senhas não conferem!')
     return
   }
