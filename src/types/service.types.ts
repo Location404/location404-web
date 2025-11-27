@@ -43,7 +43,7 @@ export interface IGameEngineService {
   onMatchFound: ((data: import('./game.types').MatchFoundResponse) => void) | null
   onRoundStarted: ((data: import('./game.types').RoundStartedResponse) => void) | null
   onGuessSubmitted: ((message: string) => void) | null
-  onOpponentSubmitted: ((data: { playerId: string; opponentId: string }) => void) | null
+  onOpponentSubmitted: ((data: { playerId: string; matchId: string }) => void) | null
   onTimerAdjusted: ((data: { matchId: string; roundId: string; newDuration: number; adjustedAt: string }) => void) | null
   onRoundEnded: ((data: import('./game.types').RoundEndedResponse) => void) | null
   onMatchEnded: ((data: import('./game.types').MatchEndedResponse) => void) | null

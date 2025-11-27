@@ -210,12 +210,9 @@ export const useGameEngine = () => {
       youSubmitted.value = true
     }
 
-    gameService.onOpponentSubmitted = (data: { playerId: string; opponentId: string }) => {
+    gameService.onOpponentSubmitted = (data: { playerId: string; matchId: string }) => {
       console.log('[useGameEngine] OpponentSubmitted event received:', data)
-
-      if (data.playerId !== currentPlayerId.value) {
-        opponentSubmitted.value = true
-      }
+      opponentSubmitted.value = true
     }
 
     gameService.onTimerAdjusted = (data: { matchId: string; roundId: string; newDuration: number; adjustedAt: string }) => {
