@@ -14,7 +14,6 @@
         <!-- Content -->
         <div class="relative z-10 p-8 text-center text-white">
           <div class="mb-4">
-            <div class="text-6xl mb-3">{{ isWinner ? '🏆' : '😔' }}</div>
             <h1 class="text-4xl font-black mb-2">{{ isWinner ? 'VITÓRIA!' : 'DERROTA' }}</h1>
             <p class="text-xl font-semibold opacity-90">
               {{ isWinner ? 'Parabéns! Você venceu a partida!' : 'Quase lá! Continue treinando!' }}
