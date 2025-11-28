@@ -8,7 +8,6 @@ import App from './App.vue'
 import router from './router'
 import { bootstrapServices } from './core/service-registration'
 
-// Bootstrap DI container and register services
 bootstrapServices()
 
 const app = createApp(App)
