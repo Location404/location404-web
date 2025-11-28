@@ -16,7 +16,6 @@ const waitForGoogleMaps = (): Promise<void> => {
       }
     }, 50)
 
-    // Timeout after 10 seconds
     setTimeout(() => {
       clearInterval(checkInterval)
       resolve()
@@ -52,18 +51,18 @@ export const loadGoogleMaps = (apiKey: string): Promise<void> => {
     script.defer = true
 
     script.onload = async () => {
-      console.log('📦 Script loaded, waiting for google.maps...')
+      console.log('Script loaded, waiting for google.maps...')
       await waitForGoogleMaps()
       isLoaded = true
       isLoading = false
-      console.log('✅ Google Maps ready')
+      console.log('Google Maps ready')
       resolve()
     }
 
     script.onerror = (error) => {
       isLoading = false
       loadPromise = null
-      console.error('❌ Failed to load Google Maps:', error)
+      console.error('Failed to load Google Maps:', error)
       reject(error)
     }
 

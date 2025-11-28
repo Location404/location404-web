@@ -272,10 +272,8 @@ async function saveProfile() {
 
     toastSuccess('Perfil salvo com sucesso!')
 
-    // Refresh profile
     await fetchUserProfile()
 
-    // Clear password fields
     password.value = ''
     confirmPassword.value = ''
     selectedFile.value = null

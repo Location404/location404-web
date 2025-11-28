@@ -72,7 +72,6 @@ export const useGameEngine = () => {
           clearInterval(countdownTimer)
           countdownTimer = null
         }
-        // Only PlayerA starts the round to avoid race condition
         if (isPlayerA.value) {
           startRound()
         }

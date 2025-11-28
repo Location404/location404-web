@@ -113,7 +113,7 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
 
           return client.request(originalRequest)
         } catch (refreshError) {
-          console.error('❌ Refresh token failed:', refreshError)
+          console.error('Refresh token failed:', refreshError)
           processQueue(refreshError as Error)
           isRefreshing = false
 

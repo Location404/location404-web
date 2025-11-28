@@ -282,7 +282,6 @@ const {
   resetState,
 } = useGameEngine()
 
-// Formatar timer (0:30, 0:15, 0:05, etc)
 const formatTimer = (seconds: number) => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60

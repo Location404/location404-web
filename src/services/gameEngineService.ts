@@ -52,9 +52,9 @@ export class GameEngineService implements IGameEngineService {
 
     try {
       await this.connection.start()
-      console.log('✅ SignalR Connected to GameHub')
+      console.log('SignalR Connected to GameHub')
     } catch (error) {
-      console.error('❌ SignalR Connection Error:', error)
+      console.error('SignalR Connection Error:', error)
       throw error
     }
   }
@@ -68,12 +68,12 @@ export class GameEngineService implements IGameEngineService {
     })
 
     this.connection.on('RoundStarted', (data: RoundStartedResponse) => {
-      console.log('🎯 Round Started:', data)
+      console.log('Round Started:', data)
       this.onRoundStarted?.(data)
     })
 
     this.connection.on('GuessSubmitted', (message: string) => {
-      console.log('✅ Guess Submitted:', message)
+      console.log('Guess Submitted:', message)
       this.onGuessSubmitted?.(message)
     })
 
@@ -108,7 +108,7 @@ export class GameEngineService implements IGameEngineService {
     })
 
     this.connection.on('Error', (message: string) => {
-      console.error('❌ Game Error:', message)
+      console.error('Game Error:', message)
       this.onError?.(message)
     })
 
@@ -117,11 +117,11 @@ export class GameEngineService implements IGameEngineService {
     })
 
     this.connection.onreconnected((connectionId) => {
-      console.log('✅ SignalR reconnected:', connectionId)
+      console.log('SignalR reconnected:', connectionId)
     })
 
     this.connection.onclose((error) => {
-      console.error('❌ SignalR connection closed:', error)
+      console.error('SignalR connection closed:', error)
     })
   }
 

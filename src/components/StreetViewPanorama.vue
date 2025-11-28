@@ -62,7 +62,6 @@ const initStreetView = async () => {
   try {
     await loadGoogleMaps(props.apiKey)
 
-    // Double-check that google.maps is available
     if (!(window as any).google?.maps) {
       throw new Error('Google Maps not loaded')
     }
@@ -74,21 +73,18 @@ const initStreetView = async () => {
 
     console.log('🗺️ Requesting Street View for position:', requestedPosition)
 
-    // Initialize Street View Service to check coverage
     streetViewService = new google.maps.StreetViewService()
 
-    // Check if Street View is available at this location
     streetViewService.getPanorama(
       {
         location: requestedPosition,
-        radius: 100, // Search within 100 meters
+        radius: 100,
         source: google.maps.StreetViewSource.OUTDOOR,
       },
       (data, status) => {
         if (status === google.maps.StreetViewStatus.OK && data) {
           console.log('✅ Street View available at:', data.location?.latLng?.toJSON())
 
-          // Initialize panorama with the found location
           panorama = new google.maps.StreetViewPanorama(streetViewContainer.value!, {
             pano: data.location?.pano,
             pov: {
@@ -114,10 +110,9 @@ const initStreetView = async () => {
           isLoading.value = false
           hasError.value = false
         } else {
-          console.error('❌ Street View not available. Status:', status)
+          console.error('Street View not available. Status:', status)
           console.error('Requested position:', requestedPosition)
 
-          // Set error state
           isLoading.value = false
           hasError.value = true
 
@@ -144,7 +139,6 @@ const initStreetView = async () => {
             motionTrackingControl: false,
           })
 
-          // Hide error message after 3 seconds to let user try anyway
           setTimeout(() => {
             hasError.value = false
           }, 3000)
@@ -174,7 +168,6 @@ watch(
 
     console.log('🔄 Updating Street View location:', position)
 
-    // Check if Street View is available at new location
     streetViewService.getPanorama(
       {
         location: position,
@@ -183,7 +176,7 @@ watch(
       },
       (data, status) => {
         if (status === google.maps.StreetViewStatus.OK && data && panorama) {
-          console.log('✅ Street View available at new position:', data.location?.latLng?.toJSON())
+          console.log('Street View available at new position:', data.location?.latLng?.toJSON())
 
           panorama.setPano(data.location?.pano || '')
           panorama.setPov({
@@ -194,12 +187,11 @@ watch(
           isLoading.value = false
           hasError.value = false
         } else {
-          console.error('❌ Street View not available at new location. Status:', status)
+          console.error('Street View not available at new location. Status:', status)
 
           isLoading.value = false
           hasError.value = true
 
-          // Fallback: try to set position anyway
           if (panorama) {
             panorama.setPosition(position)
             panorama.setPov({
@@ -208,7 +200,6 @@ watch(
             })
           }
 
-          // Hide error message after 3 seconds
           setTimeout(() => {
             hasError.value = false
           }, 3000)

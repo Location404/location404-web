@@ -104,7 +104,6 @@ const initMap = async () => {
   }
 }
 
-// Watch for external changes to modelValue
 watch(
   () => props.modelValue,
   (newValue) => {
@@ -130,7 +129,6 @@ watch(
         })
       }
     } else if (!newValue && marker) {
-      // Clear marker if modelValue is null
       marker.setMap(null)
       marker = null
       guess.value = null
@@ -141,11 +139,9 @@ watch(
 onMounted(() => {
   initMap()
 
-  // Add ResizeObserver to handle map resize when div expands
   if (mapContainer.value) {
     const resizeObserver = new ResizeObserver(() => {
       if (map) {
-        // Trigger resize event on the map
         google.maps.event.trigger(map, 'resize')
       }
     })

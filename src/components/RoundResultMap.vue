@@ -36,7 +36,6 @@ const initMap = async () => {
       throw new Error('Google Maps not loaded')
     }
 
-    // Initialize map centered on correct answer
     map = new google.maps.Map(mapContainer.value, {
       center: { lat: props.correctAnswer.x, lng: props.correctAnswer.y },
       zoom: 3,
@@ -46,7 +45,6 @@ const initMap = async () => {
       zoomControl: true,
     })
 
-    // Create correct answer marker (green)
     correctMarker = new google.maps.Marker({
       position: { lat: props.correctAnswer.x, lng: props.correctAnswer.y },
       map: map,
@@ -149,7 +147,6 @@ const initMap = async () => {
     }
     map.fitBounds(bounds)
 
-    // Add some padding
     const padding = { top: 50, right: 50, bottom: 50, left: 50 }
     map.fitBounds(bounds, padding)
 
