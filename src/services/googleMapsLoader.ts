@@ -36,7 +36,7 @@ export const loadGoogleMaps = (apiKey: string): Promise<void> => {
 
   // Start loading
   isLoading = true
-  loadPromise = new Promise(async (resolve, reject) => {
+  loadPromise = new Promise((resolve, reject) => {
     // Check if already loaded by another component
     if ((window as any).google?.maps) {
       isLoaded = true
@@ -50,20 +50,27 @@ export const loadGoogleMaps = (apiKey: string): Promise<void> => {
     script.async = true
     script.defer = true
 
-    script.onload = async () => {
+    script.onload = () => {
       console.log('Script loaded, waiting for google.maps...')
-      await waitForGoogleMaps()
-      isLoaded = true
-      isLoading = false
-      console.log('Google Maps ready')
-      resolve()
+      waitForGoogleMaps()
+        .then(() => {
+          isLoaded = true
+          isLoading = false
+          console.log('Google Maps ready')
+          resolve()
+        })
+        .catch((error) => {
+          isLoading = false
+          loadPromise = null
+          reject(error)
+        })
     }
 
     script.onerror = (error) => {
       isLoading = false
       loadPromise = null
       console.error('Failed to load Google Maps:', error)
-      reject(error)
+      reject(new Error(String(error)))
     }
 
     document.head.appendChild(script)

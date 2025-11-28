@@ -94,7 +94,7 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
               return client.request(originalRequest)
             })
             .catch((err) => {
-              return Promise.reject(err)
+              throw err
             })
         }
 
@@ -125,7 +125,7 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
             window.location.href = '/login'
           }
 
-          return Promise.reject(refreshError)
+          throw refreshError
         }
       }
 
@@ -136,7 +136,7 @@ export const createApiClient = (service: ApiService): AxiosInstance => {
         error.message
       )
 
-      return Promise.reject(error)
+      throw error
     }
   )
 
